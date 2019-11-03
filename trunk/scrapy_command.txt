@@ -1,6 +1,6 @@
-# 创建项目
+# 创建scrapy项目
 python3 -m scrapy startproject jianshu
 # 切换到该项目
 cd jianshu
 # 创建爬虫文件
-python3 -m scrapy genspider jianshu jianshu.com
+python3 -m scrapy genspider jianshu_crawler jianshu.com
