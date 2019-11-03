@@ -1,6 +1,33 @@
-# 创建scrapy项目
-python3 -m scrapy startproject jianshu
-# 切换到该项目
-cd jianshu
-# 创建爬虫文件
-python3 -m scrapy genspider jianshu_crawler jianshu.com
+<<全局命令>>（全局命令可以在任何地方使用）
+startproject
+genspider
+settings
+runspider
+shell
+fetch
+view
+version
+
+<<项目命令>>（项目命令只能在项目目录下使用）
+crawl
+check
+list
+edit
+parse
+bench
+
+<<示例>>（如果命令显示无效，在命令前面加上 --> python -m）
+1. scrapy startproject myProject(baidu)  # 创建scrapy项目
+2. cd baidu  # 切换到该项目
+3. crapy genspider crawlerName(baiduCrawler) domainName(baidu.com)  # 创建爬虫文件
+4. scrapy crawl baiduCrawler --nolog  # 执行爬虫
+
+--nolog 不打印日志
+--headers 打印响应头信息
+--no-redirect 不做跳转（禁止重定向）
+
+scrapy check  # 用于检查代码是否有错误
+scrapy list  # 列出所有可用的爬虫
+scrapy settings -h  # 获取当前的配置信息
+scrapy fetch http://www.baidu.com  # 该命令会通过scrapy downloader 将网页的源代码下载下来并显示出来
+scrapy view http://www.taobao.com  # 该命令会将网页document内容下载下来，并且在浏览器显示出来（可以判断是否是Ajax请求）
