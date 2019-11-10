@@ -1,33 +1,24 @@
-<<全局命令>>（全局命令可以在任何地方使用）
-startproject
-genspider
-settings
-runspider
-shell
-fetch
+<<全局命令>>（全局命令可以在任何地方使用）         <<项目命令>>（项目命令只能在项目目录下使用）
+startproject       # 创建爬虫项目                crawl           # 启动爬虫程序
+genspider          # 创建爬虫文件                check           # 用于检查代码是否有错误
+settings                                        list            # 列出所有可用的爬虫
+runspider                                       edit
+shell                                           parse
+version                                         bench
 view
-version
+fetch
 
-<<项目命令>>（项目命令只能在项目目录下使用）
-crawl
-check
-list
-edit
-parse
-bench
 
 <<示例>>（如果命令显示无效，在命令前面加上 --> python -m）
-1. scrapy startproject myProject(baidu)  # 创建scrapy项目
-2. cd baidu  # 切换到该项目
-3. crapy genspider crawlerName(baiduCrawler) domainName(baidu.com)  # 创建爬虫文件
-4. scrapy crawl baiduCrawler --nolog  # 执行爬虫
+1. scrapy startproject example  # 创建名字为example的项目
+2. cd example  # 切换到该项目
+3. crapy genspider sample sample.com  # 创建名字为sample的爬虫文件，并且初始域名为sample.com
+4. scrapy crawl sample  # 执行sample爬虫程序
+5. scrapy crawl sample -o sample.json  # 保存输出结果到json文件（还有csv，xml，pickle，marshal，ftp等格式可以存取）
 
---nolog 不打印日志
---headers 打印响应头信息
---no-redirect 不做跳转（禁止重定向）
+scrapy crawl sample --nolog 不打印日志
+scrapy crawl sample --headers 打印响应头信息
+scrapy crawl sample --no-redirect 不做跳转（禁止重定向）
 
-scrapy check  # 用于检查代码是否有错误
-scrapy list  # 列出所有可用的爬虫
-scrapy settings -h  # 获取当前的配置信息
 scrapy fetch http://www.baidu.com  # 该命令会通过scrapy downloader 将网页的源代码下载下来并显示出来
 scrapy view http://www.taobao.com  # 该命令会将网页document内容下载下来，并且在浏览器显示出来（可以判断是否是Ajax请求）

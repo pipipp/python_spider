@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for jianshu project
+# Scrapy settings for example project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,14 +9,14 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'jianshu'
+BOT_NAME = 'example'
 
-SPIDER_MODULES = ['jianshu.spiders']
-NEWSPIDER_MODULE = 'jianshu.spiders'
+SPIDER_MODULES = ['example.spiders']
+NEWSPIDER_MODULE = 'example.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'jianshu (+http://www.yourdomain.com)'
+#USER_AGENT = 'example (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -47,13 +47,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'jianshu.middlewares.JianshuSpiderMiddleware': 543,
+#    'example.middlewares.ExampleSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'jianshu.middlewares.JianshuDownloaderMiddleware': 543,
+#    'example.middlewares.ExampleDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -65,7 +65,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    'jianshu.pipelines.JianshuPipeline': 300,
+#    'example.pipelines.ExamplePipeline': 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
