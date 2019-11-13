@@ -38,7 +38,7 @@ class MongoPipeline(object):
 
     def process_item(self, item, spider):
         name = item.__class__.__name__  # 创建一个集合，name='ExampleItem'
-        self.db[name].insert_one(dict(item))  # 插入数据到Mongodb
+        self.db[name].insert_one(dict(item))  # 插入数据到ExampleItem集合中
         return item
 
     def close_spider(self, spider):
