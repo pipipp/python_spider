@@ -4,7 +4,7 @@ from ..items import ExampleItem
 
 
 class SampleSpider(scrapy.Spider):
-    name = 'sample'  # 项目名称，具有唯一性不能同名
+    name = 'sample_spider'  # 项目名称，具有唯一性不能同名
     allowed_domains = ['quotes.toscrape.com']  # 允许的domain range
     start_urls = ['http://quotes.toscrape.com/']  # 起始URL
 
