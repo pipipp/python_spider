@@ -64,6 +64,8 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+
+# ITEM_PIPELINES字典的value越小，优先级越高，如下 300优先级 > 400优先级
 ITEM_PIPELINES = {
    'example.pipelines.TextPipeline': 300,
    'example.pipelines.MongoPipeline': 400,

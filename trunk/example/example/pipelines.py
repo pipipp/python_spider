@@ -27,17 +27,17 @@ class MongoPipeline(object):
     def from_crawler(cls, crawler):
         # 使用类方法，返回带有MONGO_URI和MONGO_DB值的类对象
         return cls(
-            mongo_uri=crawler.settings.get('MONGO_URI'),
-            mongo_db=crawler.settings.get('MONGO_DB')
+            mongo_uri=crawler.settings.get('MONGO_URI'),  # MONGO_URI的值从settings.py获取
+            mongo_db=crawler.settings.get('MONGO_DB')  # MONGO_DB的值从settings.py获取
         )
 
     def open_spider(self, spider):
-        # 初始化MongoClient，打开连接，创建数据库
+        # 打开Mongodb连接，创建数据库
         self.client = pymongo.MongoClient(self.mongo_uri)
         self.db = self.client[self.mongo_db]
 
     def process_item(self, item, spider):
-        name = item.__class__.__name__  # name='ExampleItem'
+        name = item.__class__.__name__  # 创建一个集合，name='ExampleItem'
         self.db[name].insert_one(dict(item))  # 插入数据到Mongodb
         return item
 
