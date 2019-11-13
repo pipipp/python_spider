@@ -12,7 +12,7 @@ fetch
 <<示例>>（如果命令显示无效，在命令前面加上 --> python -m）
 1. scrapy startproject example  # 创建名字为example的项目
 2. cd example  # 切换到该项目
-3. crapy genspider sample sample.com  # 创建名字为sample的爬虫文件，并且初始域名为sample.com
+3. scrapy genspider sample sample.com  # 创建名字为sample的爬虫文件，并且初始域名为sample.com
 4. scrapy crawl sample  # 执行sample爬虫程序
 5. scrapy crawl sample -o sample.json  # 保存输出结果到json文件（还有csv，xml，pickle，marshal，ftp等格式可以存取）
 
