@@ -4,11 +4,13 @@ from scrapy.exceptions import DropItem
 
 
 class TextPipeline(object):
-
+    """
+    自定义类
+    """
     def __init__(self):
         self.limit = 50
 
-    def process_item(self, item, spider):
+    def process_item(self, item, spider):  # TODO 必须要实现的方法
         if item['text']:
             if len(item['text']) > self.limit:  # 对超过50个字节长度的字符串进行切割
                 item['text'] = item['text'][:self.limit].rstrip() + '...'
@@ -18,7 +20,9 @@ class TextPipeline(object):
 
 
 class MongoPipeline(object):
-
+    """
+    自定义类
+    """
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
         self.mongo_db = mongo_db
@@ -36,7 +40,7 @@ class MongoPipeline(object):
         self.client = pymongo.MongoClient(self.mongo_uri)
         self.db = self.client[self.mongo_db]
 
-    def process_item(self, item, spider):
+    def process_item(self, item, spider):  # TODO 必须要实现的方法
         name = item.__class__.__name__  # 创建一个集合，name='ExampleItem'
         self.db[name].insert_one(dict(item))  # 插入数据到ExampleItem集合中
         return item

@@ -14,6 +14,9 @@ BOT_NAME = 'example'
 SPIDER_MODULES = ['example.spiders']
 NEWSPIDER_MODULE = 'example.spiders'
 
+# TODO 设置默认请求头
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
+             'Chrome/78.0.3904.108 Safari/537.36'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'example (+http://www.yourdomain.com)'
@@ -52,9 +55,11 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'example.middlewares.ExampleDownloaderMiddleware': 543,
-#}
+
+# TODO 设置随机请求头
+DOWNLOADER_MIDDLEWARES = {
+   'example.middlewares.RandomUserAgentMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -65,7 +70,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
-# ITEM_PIPELINES字典的value越小，优先级越高，如下 300优先级 > 400优先级
+# TODO ITEM_PIPELINES字典的value越小，优先级越高，如下所示：300优先级 > 400优先级
 ITEM_PIPELINES = {
    'example.pipelines.TextPipeline': 300,
    'example.pipelines.MongoPipeline': 400,

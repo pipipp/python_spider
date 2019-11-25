@@ -4,8 +4,28 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-
+import random
 from scrapy import signals
+
+
+class RandomUserAgentMiddleware(object):
+    """
+    自定义类
+    """
+    def __init__(self):
+        self.user_agents = [
+            # Chrome UA
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+            ' Chrome/73.0.3683.75 Safari/537.36',
+            # IE UA
+            'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko',
+            # Microsoft Edge UA
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+            ' Chrome/64.0.3282.140 Safari/537.36 Edge/18.17763'
+        ]
+
+    def process_request(self, request, spider):
+        request.headers['User-Agent'] = random.choice(self.user_agents)
 
 
 class ExampleSpiderMiddleware(object):
