@@ -9,7 +9,7 @@ import scrapy
 
 
 class ExampleItem(scrapy.Item):
-    # define the fields for your item here like:
+    # TODO 定义数据结构
     text = scrapy.Field()
     author = scrapy.Field()
     tags = scrapy.Field()

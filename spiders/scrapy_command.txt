@@ -1,10 +1,10 @@
 <<全局命令>>（全局命令可以在任何地方使用）         <<项目命令>>（项目命令只能在项目目录下使用）
-startproject       # 创建爬虫项目                crawl           # 启动爬虫程序
-genspider          # 创建爬虫文件                check           # 用于检查代码是否有错误
-settings                                        list            # 列出所有可用的爬虫
-runspider                                       edit
-shell                                           parse
-version                                         bench
+startproject       # 创建爬虫项目                   crawl           # 启动爬虫程序
+genspider          # 创建爬虫文件                   check           # 用于检查代码是否有错误
+settings                                            list            # 列出所有可用的爬虫
+runspider                                           edit
+shell                                               parse
+version                                             bench
 view
 fetch
 
