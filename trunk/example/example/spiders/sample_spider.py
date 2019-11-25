@@ -6,7 +6,7 @@ start_urls                 起始URL列表，当没有重写start_requests()方�
 custom_settings            它是一个字典，专属与本Spider的配置，此设置会覆盖项目全局的设置，必须在初始化前被更新，必须定义成类变量
 settings                   它是一个Settings对象，我们可以直接获取项目的全局设置变量
 start_requests()           生成初始请求，必须返回一个可迭代对象，默认使用start_urls里的URL和GET请求，如需使用POST需要重写此方法
-parse()                    当Response没有指定回调函数时，该方法会默认被调用
+parse()                    当Response没有指定回调函数时，该方法会默认被调用，该函数必须要返回一个包含Request或Item的可迭代对象
 closed()                   当Spider关闭时，该方法会被调用，可以在这里定义释放资源的一些操作或其他收尾操作
 """
 # -*- coding: utf-8 -*-
@@ -25,6 +25,7 @@ class SampleSpider(scrapy.Spider):
         :param response:
         :return:
         """
+        # json.loads(response.body)  # 获取AJAX数据
         # response.xpath('//a/text()')  # 使用xpath选择器解析，返回一个列表
         # response.xpath('//a/text()').re('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的分组列表
         # response.xpath('//a/text()').re_first('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的第一个结果
