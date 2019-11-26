@@ -22,12 +22,7 @@ class DoubanSpiderSpider(scrapy.Spider):
     def parse(self, response):
         for i in json.loads(response.body)['items']:
             url_info = re.search('a href="(.+?)"', i)
-
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                              'Chrome/78.0.3904.108 Safari/537.36'
-            }
-            yield Request(url=url_info.group(1), headers=headers, callback=self.parse_each_url)
+            yield Request(url=url_info.group(1), callback=self.parse_each_url)
 
         # page_num = re.search(r'start=(\d+)', response.url).group(1)
         # page_num = 'start=' + str(int(page_num) + 20)
