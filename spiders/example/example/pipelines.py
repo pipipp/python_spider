@@ -31,6 +31,7 @@ class MongoPipeline(object):
 
     @classmethod
     def from_crawler(cls, crawler):
+        # pipelines的准备工作，通过crawler可以拿到全局配置的每个配置信息
         # 使用类方法，返回带有MONGO_URI和MONGO_DB值的类对象
         return cls(
             mongo_uri=crawler.settings.get('MONGO_URI'),  # MONGO_URI的值从settings.py获取
@@ -38,8 +39,8 @@ class MongoPipeline(object):
         )
 
     def open_spider(self, spider):
-        # 打开Mongodb连接，创建数据库
-        self.client = pymongo.MongoClient(self.mongo_uri)
+        # 当Spider开启时，这个方法会被调用
+        self.client = pymongo.MongoClient(self.mongo_uri)  # 打开Mongodb连接
         self.db = self.client[self.mongo_db]
 
     def process_item(self, item, spider):  # TODO 必须要实现的方法（必须要有返回值）
@@ -48,4 +49,5 @@ class MongoPipeline(object):
         return item
 
     def close_spider(self, spider):
+        # 当Spider关闭时，这个方法会被调用
         self.client.close()  # 关闭Mongodb连接
