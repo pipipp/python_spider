@@ -23,13 +23,26 @@ class SampleSpider(scrapy.Spider):
     allowed_domains = ['quotes.toscrape.com']  # 允许的domain range
     start_urls = ['http://quotes.toscrape.com/']  # 起始URL
 
+    """更改初始请求，必须返回一个可迭代对象
+    def start_requests(self):
+        return [Request(url=self.start_urls[0], callback=self.parse)]
+        or
+        yield Request(url=self.start_urls[0], callback=self.parse)
+    """
+
     def parse(self, response):
         """
-        该函数必须要返回一个包含 Request 或 Item 的可迭代对象
-        :param response:
-        :return:
+        当Response没有指定回调函数时，该方法会默认被调用
+        :param response: From the start_requests() function
+        :return: 该函数必须要返回一个包含 Request 或 Item 的可迭代对象
         """
-        # json.loads(response.body)  # 获取AJAX数据
+        # print(response.text)  # 返回一个HTML
+        # print(response.body)  # 返回一个二进制的HTML
+        # print(response.url)  # 返回一个当前请求的URL
+        # json.loads(response.text)  # 获取AJAX数据，返回一个字典
+
+        # print(self.settings.USER_AGENT)  # 从settings.py获取全局配置信息
+
         # response.xpath('//a/text()').extract()  # 使用xpath选择器解析，返回一个列表
         # response.xpath('//a/text()').re('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的分组列表
         # response.xpath('//a/text()').re_first('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的第一个结果
