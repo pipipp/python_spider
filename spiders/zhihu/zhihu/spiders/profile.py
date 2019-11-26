@@ -2,7 +2,6 @@
 import os
 import re
 import json
-import logging
 
 from urllib.parse import urlencode
 from scrapy.spiders import CrawlSpider
@@ -215,4 +214,4 @@ class ZhihuSipder(CrawlSpider):
         )
 
     def parse_err(self, response):
-        logging.ERROR('crawl {} failed'.format(response.url))
+        self.logger.ERROR('crawl {} failed'.format(response.url))

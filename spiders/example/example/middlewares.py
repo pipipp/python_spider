@@ -25,7 +25,29 @@ class RandomUserAgentMiddleware(object):
         ]
 
     def process_request(self, request, spider):
+        # TODO 在发送请求到 Download 之前调用此方法，可以修改User-Agent、处理重定向、设置代理、失败重试、设置Cookies等功能
         request.headers['User-Agent'] = random.choice(self.user_agents)
+
+    def process_response(self, request, response, spider):
+        # TODO 在收到 Response 之后调用此方法，可以处理响应结果再发送给 Spider 解析
+        # Called with the response returned from the downloader.
+
+        # Must either;
+        # - return a Response object
+        # - return a Request object  # TODO 返回一个全新的 Request 放到调度队列，等待被调度
+        # - or raise IgnoreRequest
+        return response
+
+    def process_exception(self, request, exception, spider):
+        # TODO 当 Downloader 或 process_request() 方法抛出异常时，会调用此方法
+        # Called when a download handler or a process_request()
+        # (from other downloader middleware) raises an exception.
+
+        # Must either:
+        # - return None: continue processing this exception
+        # - return a Response object: stops process_exception() chain
+        # - return a Request object: stops process_exception() chain  # TODO 返回一个全新的 Request 放到调度队列，等待被调度
+        pass
 
 
 class ExampleSpiderMiddleware(object):
