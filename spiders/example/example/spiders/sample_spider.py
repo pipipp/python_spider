@@ -30,16 +30,18 @@ class SampleSpider(scrapy.Spider):
         :return:
         """
         # json.loads(response.body)  # 获取AJAX数据
-        # response.xpath('//a/text()')  # 使用xpath选择器解析，返回一个列表
+        # response.xpath('//a/text()').extract()  # 使用xpath选择器解析，返回一个列表
         # response.xpath('//a/text()').re('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的分组列表
         # response.xpath('//a/text()').re_first('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的第一个结果
         quotes = response.css('.quote')  # 使用css选择器，返回一个列表，包含"class='quote'"的所有结果
 
         item = ExampleItem()
         for quote in quotes:
-            item['text'] = quote.css('.text::text').extract_first()  # 返回匹配到的第一个文本字符串
-            item['author'] = quote.css('.author::text').extract_first()  # 返回匹配到的第一个文本字符串
-            item['tags'] = quote.css('.tags .tag::text').extract()  # 返回一个列表，包含匹配到的所有文本字符串
+            # ::text  获取文本
+            # ::attr(src)  获取src属性的值
+            item['text'] = quote.css('.text::text').extract_first()  # 返回匹配到的第一个结果
+            item['author'] = quote.css('.author::text').extract_first()
+            item['tags'] = quote.css('.tags .tag::text').extract()  # 返回一个列表，包含匹配到的所有结果
             yield item
 
         next_url = response.css('.pager .next a::attr("href")').extract_first()  # 返回下一页的URL
