@@ -20,7 +20,8 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
              'Chrome/78.0.3904.108 Safari/537.36'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+# TODO 不请求Robots协议
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
