@@ -13,6 +13,7 @@ closed()                   当Spider关闭时，该方法会被调用，可以�
 """
 # -*- coding: utf-8 -*-
 import scrapy
+
 from ..items import ExampleItem
 from scrapy.http import Request, FormRequest
 
