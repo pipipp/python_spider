@@ -14,12 +14,10 @@ BOT_NAME = 'example'
 SPIDER_MODULES = ['example.spiders']
 NEWSPIDER_MODULE = 'example.spiders'
 
-# TODO 设置默认请求头
+# Crawl responsibly by identifying yourself (and your website) on the user-agent
+# TODO 设置用户代理请求头
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
              'Chrome/78.0.3904.108 Safari/537.36'
-
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'example (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -36,7 +34,8 @@ ROBOTSTXT_OBEY = True
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+# TODO 使用带Cookies的请求
+COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -55,8 +54,7 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-
-# TODO 设置随机请求头
+# TODO 使用下载中间件，设置随机请求头
 DOWNLOADER_MIDDLEWARES = {
    'example.middlewares.RandomUserAgentMiddleware': 543,
 }
@@ -69,12 +67,12 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-# TODO ITEM_PIPELINES字典的value越小，优先级越高，如下所示：300优先级 > 400优先级
+# TODO 使用项目管道，过滤和保存数据（字典的value越小，优先级越高，如下所示：300优先级 > 400优先级）
 ITEM_PIPELINES = {
    'example.pipelines.TextPipeline': 300,
    'example.pipelines.MongoPipeline': 400,
 }
+# TODO Mongodb配置
 MONGO_URI = 'localhost'
 MONGO_DB = 'example'
 

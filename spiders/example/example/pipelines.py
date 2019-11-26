@@ -10,7 +10,7 @@ class TextPipeline(object):
     def __init__(self):
         self.limit = 50
 
-    def process_item(self, item, spider):  # TODO 必须要实现的方法
+    def process_item(self, item, spider):  # TODO 必须要实现的方法（必须要有返回值）
         if item['text']:
             if len(item['text']) > self.limit:  # 对超过50个字节长度的字符串进行切割
                 item['text'] = item['text'][:self.limit].rstrip() + '...'
@@ -42,7 +42,7 @@ class MongoPipeline(object):
         self.client = pymongo.MongoClient(self.mongo_uri)
         self.db = self.client[self.mongo_db]
 
-    def process_item(self, item, spider):  # TODO 必须要实现的方法
+    def process_item(self, item, spider):  # TODO 必须要实现的方法（必须要有返回值）
         name = item.__class__.__name__  # 创建一个集合，name='ExampleItem'
         self.db[name].insert_one(dict(item))  # 插入数据到ExampleItem集合中
         return item

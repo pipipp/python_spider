@@ -14,6 +14,7 @@ closed()                   当Spider关闭时，该方法会被调用，可以�
 # -*- coding: utf-8 -*-
 import scrapy
 from ..items import ExampleItem
+from scrapy.http import Request, FormRequest
 
 
 class SampleSpider(scrapy.Spider):
@@ -42,4 +43,4 @@ class SampleSpider(scrapy.Spider):
 
         next_url = response.css('.pager .next a::attr("href")').extract_first()  # 返回下一页的URL
         url = response.urljoin(next_url)  # 拼接成一个绝对的URL
-        yield scrapy.Request(url=url, callback=self.parse)  # 设置回调函数，循环检索每一页
+        yield Request(url=url, callback=self.parse)  # 设置回调函数，循环检索每一页
