@@ -39,9 +39,10 @@ class SampleSpider(scrapy.Spider):
         :return: 该函数必须要返回一个包含 Request 或 Item 的可迭代对象
         """
         # TODO Response type
-        # print(response.text)  # 返回一个HTML
-        # print(response.body)  # 返回一个二进制的HTML
-        # print(response.url)  # 返回一个当前请求的URL
+        # print(response.text)  # 返回Response的HTML
+        # print(response.body)  # 返回Response的二进制格式HTML
+        # print(response.url)  # 返回Response的URL
+        # print(response.headers)  # 返回Response的headers
         # json.loads(response.text)  # 获取AJAX数据，返回一个字典
 
         # TODO 使用Selector选择器
