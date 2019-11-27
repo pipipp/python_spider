@@ -6,7 +6,6 @@ import json
 from ..items import DoubanItem
 from urllib.parse import urlencode, unquote
 from scrapy.http import Request
-from scrapy.selector import Selector
 
 
 class DoubanSpiderSpider(scrapy.Spider):
@@ -29,14 +28,13 @@ class DoubanSpiderSpider(scrapy.Spider):
 
     def get_each_url(self, response):
         """
-        获取响应结果里的每一页URL
+        获取每一篇文章的URL
         :param response:
         :return:
         """
         for index, value in enumerate(json.loads(response.body)['items']):
             after_url = unquote(re.search('url=(http.+?)&', value).group(1))
             self.logger.info('Capture the url({}): {}'.format(index + 1, after_url))
-
             yield Request(url=after_url, callback=self.parse)
 
         # page_num = re.search(r'start=(\d+)', response.url).group(1)
@@ -50,9 +48,8 @@ class DoubanSpiderSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        selector = Selector(response=response)
         item = DoubanItem()
-        item['title'] = selector.css('title::text').extract_first()
-        item['article'] = selector.css('div#link-report div.note ::text').extract()
         item['url'] = response.url
+        item['title'] = response.css('title::text').extract_first()
+        item['article'] = response.css('div#link-report div.note ::text').extract()
         yield item

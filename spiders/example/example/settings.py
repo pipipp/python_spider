@@ -23,6 +23,9 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 # TODO 不请求Robots协议
 ROBOTSTXT_OBEY = False
 
+# TODO 设置编码格式
+FEED_EXPORT_ENCODING = 'utf-8'
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
