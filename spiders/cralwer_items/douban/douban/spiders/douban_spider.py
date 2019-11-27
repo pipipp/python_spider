@@ -4,7 +4,7 @@ import re
 import json
 
 from ..items import DoubanItem
-from urllib.parse import urlencode, unquote
+from urllib.parse import urlencode
 from scrapy.http import Request
 
 
@@ -50,11 +50,8 @@ class DoubanSpiderSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        note_id = re.search('note/(.+?)/&amp', unquote(response.url)).group(1)
-        self.logger.info('note_id: {}'.format(note_id))
-
         item = DoubanItem()
-        item['title'] = response.xpath('//*[@id="note-{}"]/div[1]/h1/text()'.format(note_id)).extract_first()
-        item['article'] = response.xpath('//*[@id="note_{}_full"]//text()'.format(note_id)).extract()
+        item['title'] = response.css('title::text').extract_first().strip()
+        item['article'] = response.css('div#link-report div.note ::text').extract()
         item['url'] = response.url
         yield item
