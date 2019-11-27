@@ -41,7 +41,7 @@ class SampleSpider(scrapy.Spider):
         # print(response.url)  # 返回一个当前请求的URL
         # json.loads(response.text)  # 获取AJAX数据，返回一个字典
 
-        # print(self.settings.USER_AGENT)  # 从settings.py获取全局配置信息
+        # print(self.settings.get('USER_AGENT'))  # 从settings.py获取全局配置信息
 
         # response.xpath('//a/text()').extract()  # 使用xpath选择器解析，返回一个列表
         # response.xpath('//a/text()').re('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的分组列表
