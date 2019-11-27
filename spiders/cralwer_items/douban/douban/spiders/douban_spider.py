@@ -4,13 +4,13 @@ import re
 import json
 
 from ..items import DoubanItem
-from urllib.parse import urlencode
+from urllib.parse import urlencode, unquote
 from scrapy.http import Request
+from scrapy.selector import Selector
 
 
 class DoubanSpiderSpider(scrapy.Spider):
     name = 'douban_spider'
-    allowed_domains = ['https://www.douban.com/']
     start_urls = ['https://www.douban.com/j/search?']
 
     def start_requests(self):
@@ -34,8 +34,8 @@ class DoubanSpiderSpider(scrapy.Spider):
         :return:
         """
         for index, value in enumerate(json.loads(response.body)['items']):
-            after_url = re.search('a href="(.+?)"', value).group(1)
-            self.logger.info('Capture URL({}): {}'.format(index + 1, after_url))
+            after_url = unquote(re.search('url=(http.+?)&', value).group(1))
+            self.logger.info('Capture the url({}): {}'.format(index + 1, after_url))
 
             yield Request(url=after_url, callback=self.parse)
 
@@ -50,8 +50,9 @@ class DoubanSpiderSpider(scrapy.Spider):
         :param response:
         :return:
         """
+        selector = Selector(response=response)
         item = DoubanItem()
-        item['title'] = response.css('title::text').extract_first().strip()
-        item['article'] = response.css('div#link-report div.note ::text').extract()
+        item['title'] = selector.css('title::text').extract_first()
+        item['article'] = selector.css('div#link-report div.note ::text').extract()
         item['url'] = response.url
         yield item
