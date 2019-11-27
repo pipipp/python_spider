@@ -17,6 +17,7 @@ import scrapy
 
 from ..items import ExampleItem
 from scrapy.http import Request, FormRequest
+from scrapy import Selector
 
 
 class SampleSpider(scrapy.Spider):
@@ -37,18 +38,21 @@ class SampleSpider(scrapy.Spider):
         :param response: From the start_requests() function
         :return: 该函数必须要返回一个包含 Request 或 Item 的可迭代对象
         """
+        # TODO Response type
         # print(response.text)  # 返回一个HTML
         # print(response.body)  # 返回一个二进制的HTML
         # print(response.url)  # 返回一个当前请求的URL
         # json.loads(response.text)  # 获取AJAX数据，返回一个字典
 
+        # TODO 使用Selector选择器
+        # selector = Selector(response=response)  # 选择Response初始化
+        # selector = Selector(text=div)  # 选择HTML文本初始化
+        # selector.xpath('//a/text()').extract()  # 使用xpath选择器解析，返回一个列表
+        # selector.xpath('//a/text()').re('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的分组列表
+        # selector.xpath('//a/text()').re_first('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的第一个结果
+
         # print(self.settings.get('USER_AGENT'))  # 从settings.py获取全局配置信息
-
-        # response.xpath('//a/text()').extract()  # 使用xpath选择器解析，返回一个列表
-        # response.xpath('//a/text()').re('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的分组列表
-        # response.xpath('//a/text()').re_first('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的第一个结果
         quotes = response.css('.quote')  # 使用css选择器，返回一个SelectorList类型的列表
-
         item = ExampleItem()
         for quote in quotes:
             # ::text  获取文本
