@@ -69,8 +69,12 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'douban.pipelines.DoubanPipeline': 300,
+    'douban.pipelines.DoubanPipeline': 300,
+    'douban.pipelines.MongoPipeline': 400,
 }
+# Mongodb配置
+MONGO_URI = 'localhost'
+MONGO_DB = 'douban'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
