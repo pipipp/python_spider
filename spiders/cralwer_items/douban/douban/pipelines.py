@@ -44,8 +44,8 @@ class MongoPipeline(object):
         :return: 类实例
         """
         return cls(
-            mongo_uri=crawler.settings.get('MONGO_URI'),  # MONGO_URI的值从settings.py获取
-            mongo_db=crawler.settings.get('MONGO_DB')  # MONGO_DB的值从settings.py获取
+            mongo_uri=crawler.settings.get('MONGO_URI'),
+            mongo_db=crawler.settings.get('MONGO_DB')
         )
 
     def open_spider(self, spider):
@@ -64,8 +64,8 @@ class MongoPipeline(object):
         :param spider:
         :return:
         """
-        name = item.__class__.__name__  # 创建一个集合，name='DoubanItem'
-        self.db[name].insert_one(dict(item))  # 插入数据到DoubanItem集合中
+        name = item.__class__.__name__
+        self.db[name].insert_one(dict(item))
         return item
 
     def close_spider(self, spider):
