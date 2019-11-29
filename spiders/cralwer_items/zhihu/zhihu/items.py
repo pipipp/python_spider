@@ -9,6 +9,12 @@ import scrapy
 
 
 class ZhihuItem(scrapy.Item):
+    """
+    url        文章URL
+    title      文章标题
+    article    文章内容
+    """
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    url = scrapy.Field()
+    title = scrapy.Field()
+    article = scrapy.Field()
