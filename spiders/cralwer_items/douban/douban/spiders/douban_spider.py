@@ -18,7 +18,7 @@ class DoubanSpiderSpider(scrapy.Spider):
 
     ARTICLE_COUNTS = 0  # 当前文章数量总数
     LIMIT = 50  # 文章数量获取限制
-    SEARCH = 'python'  # 要搜索的关键字填入这里
+    SEARCH_INFO = 'python'  # 要搜索的关键字填入这里
 
     def start_requests(self):
         """
@@ -26,7 +26,7 @@ class DoubanSpiderSpider(scrapy.Spider):
         :return:
         """
         params = {
-            'q': self.SEARCH,
+            'q': self.SEARCH_INFO,
             'start': 5,  # 偏移参数（每次增加20）
             'cat': 1015
         }
