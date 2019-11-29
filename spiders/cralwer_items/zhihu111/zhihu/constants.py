@@ -22,7 +22,7 @@ class People(object):
 
 
 HEADER = {
-    'Host': 'www.zhihu.com',
+    'Host': 'www.zhihu111.com',
     'Connection': 'keep-alive',
     'Pragma': 'no-cache',
     'Cache-Control': 'no-cache',

@@ -2,4 +2,4 @@
 from scrapy import cmdline
 
 # 运行douban_spider爬虫
-cmdline.execute("scrapy crawl douban_spider".split())
+cmdline.execute("scrapy crawl douban_spider -o douban.json".split())

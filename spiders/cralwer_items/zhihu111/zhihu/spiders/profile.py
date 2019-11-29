@@ -13,8 +13,8 @@ from ..constants import Gender, People, HEADER
 
 
 class ZhihuSipder(CrawlSpider):
-    name = "zhihu"
-    allowed_domains = ["www.zhihu.com"]
+    name = "zhihu111"
+    allowed_domains = ["www.zhihu111.com"]
     start_url = "https://www.zhihu.com/people/weizhi-xiazhi"
 
     def __init__(self, *args, **kwargs):
