@@ -1,3 +1,6 @@
+"""
+此爬虫是爬取豆瓣网上的信息，在下面的SEARCH参数里面填入要搜索的信息，以及在LIMIT参数里面填入要抓取的文章数量即可
+"""
 # -*- coding: utf-8 -*-
 import scrapy
 import re
@@ -12,7 +15,7 @@ class DoubanSpiderSpider(scrapy.Spider):
     name = 'douban_spider'
     start_urls = ['https://www.douban.com/j/search?']
 
-    ARTICLE_COUNTS = 0  # 文章数量总数
+    ARTICLE_COUNTS = 0  # 当前文章数量总数
     LIMIT = 50  # 文章数量获取限制
     SEARCH = 'python'  # 要搜索的关键字填入这里
 
