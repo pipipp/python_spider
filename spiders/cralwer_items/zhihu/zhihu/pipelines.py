@@ -22,7 +22,7 @@ class ZhihuPipeline(object):
             if isinstance(value, str):
                 item[key] = value.strip()
             elif isinstance(value, (tuple, list)):
-                item[key] = ['\n' if i is None else i.strip() for i in value]
+                item[key] = [i.strip() for i in value]
         return item
 
 

@@ -75,7 +75,7 @@ ITEM_PIPELINES = {
 }
 # Mongodb配置
 MONGO_URI = 'localhost'
-MONGO_DB = 'douban'
+MONGO_DB = 'zhihu'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

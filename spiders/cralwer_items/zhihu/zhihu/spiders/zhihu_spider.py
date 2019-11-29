@@ -6,6 +6,7 @@ import json
 from ..items import ZhihuItem
 from urllib.parse import urlencode
 from scrapy.http import Request
+from scrapy.selector import Selector
 
 
 class ZhihuSpiderSpider(scrapy.Spider):
@@ -56,13 +57,14 @@ class ZhihuSpiderSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        self.logger.info('response: {}'.format(json.loads(response.text)['data']))
-
         item = ZhihuItem()
-        for each_info in json.loads(response.text)['data']:
-            self.logger.info('title: {}'.format(each_info['object']['title']))
-            self.logger.info('content: {}'.format(each_info['object']['content']))
-            # item['url'] = response.url
-            # item['title'] = response.css('title::text').extract_first()
-            # item['article'] = response.css('div#link-report div.note ::text').extract()
-            # yield item
+        for info in json.loads(response.text)['data']:
+            selector = Selector(text=info['highlight']['title'])
+            item['title'] = ''.join(selector.xpath('//text()').extract())
+
+            selector = Selector(text=info['highlight']['description'])
+            item['description'] = ''.join(selector.xpath('//text()').extract())
+
+            selector = Selector(text=info['object']['content'])
+            item['article'] = '\n'.join(selector.xpath('//text()').extract())
+            yield item
