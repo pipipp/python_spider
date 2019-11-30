@@ -53,18 +53,28 @@ class ZhihuSpiderSpider(scrapy.Spider):
 
     def parse(self, response):
         """
-        解析AJAX请求，保存JSON数据
+        解析AJAX请求，保存JSON文本
         :param response:
         :return:
         """
         item = ZhihuItem()
         for info in json.loads(response.text)['data']:
+            self.logger.info('ARTICLE_COUNTS is {}, LIMIT is {}'.format(self.ARTICLE_COUNTS, self.LIMIT))
+            self.ARTICLE_COUNTS += 1
+            if self.ARTICLE_COUNTS > self.LIMIT:
+                break
+
             selector = Selector(text=info['highlight']['title'])
             item['title'] = ''.join(selector.xpath('//text()').extract())
-
             selector = Selector(text=info['highlight']['description'])
             item['description'] = ''.join(selector.xpath('//text()').extract())
-
             selector = Selector(text=info['object']['content'])
             item['article'] = '\n'.join(selector.xpath('//text()').extract())
             yield item
+
+        if self.ARTICLE_COUNTS < self.LIMIT:
+            offset = 'offset=' + str(int(re.search(r'offset=(\d+)', response.url).group(1)) + 20)
+            lc_idx = 'lc_idx=' + str(int(re.search(r'lc_idx=(\d+)', response.url).group(1)) + 20)
+            next_url = re.sub(r'lc_idx=\d+', lc_idx, re.sub(r'offset=\d+', offset, response.url))
+            self.logger.info('Next url: {}'.format(next_url))
+            yield Request(url=next_url, callback=self.parse)

@@ -43,6 +43,7 @@ class DoubanSpiderSpider(scrapy.Spider):
         """
         if json.loads(response.body).get('items', None):
             for index, value in enumerate(json.loads(response.body)['items']):
+                self.logger.info('ARTICLE_COUNTS is {}, LIMIT is {}'.format(self.ARTICLE_COUNTS, self.LIMIT))
                 self.ARTICLE_COUNTS += 1
                 if self.ARTICLE_COUNTS > self.LIMIT:
                     break
@@ -52,7 +53,6 @@ class DoubanSpiderSpider(scrapy.Spider):
         else:
             self.logger.warning('No data was found under this url ({}), continue to crawl'.format(response.url))
 
-        self.logger.info('ARTICLE_COUNTS is {}, LIMIT is {}'.format(self.ARTICLE_COUNTS, self.LIMIT))
         if self.ARTICLE_COUNTS < self.LIMIT:
             page_num = re.search(r'start=(\d+)', response.url).group(1)
             page_num = 'start=' + str(int(page_num) + 20)
@@ -69,5 +69,5 @@ class DoubanSpiderSpider(scrapy.Spider):
         item = DoubanItem()
         item['url'] = response.url
         item['title'] = response.css('title::text').extract_first()
-        item['article'] = response.css('div#link-report div.note ::text').extract()
+        item['article'] = '\n'.join(response.css('div#link-report div.note ::text').extract())
         yield item
