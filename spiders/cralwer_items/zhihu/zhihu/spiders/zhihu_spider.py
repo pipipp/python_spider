@@ -1,3 +1,7 @@
+"""
+此爬虫是爬取知乎网上的信息
+在下面的SEARCH_INFO参数里面填入要搜索的信息，以及在LIMIT参数里面填入要抓取的文章数量运行即可
+"""
 # -*- coding: utf-8 -*-
 import scrapy
 import re
