@@ -8,7 +8,10 @@
 import scrapy
 
 
-class PublicCrawlersItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class BianItem(scrapy.Item):
+    """
+    description      图片描述
+    image            图片链接
+    """
+    description = scrapy.Field()
+    image = scrapy.Field()

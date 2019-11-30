@@ -7,7 +7,7 @@
 import pymongo
 
 
-class PublicCrawlersPipeline(object):
+class TextPipeline(object):
     """
     清洗过滤数据
     """

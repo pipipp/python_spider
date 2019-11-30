@@ -69,10 +69,10 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'public_crawlers.pipelines.PublicCrawlersPipeline': 300,
-    'public_crawlers.pipelines.MongoPipeline': 400,
+    'public_crawlers.pipelines.TextPipeline': 300,
+    # 'public_crawlers.pipelines.MongoPipeline': 400,
 }
-# Mongodb配置
+# Bian_wallpaper Mongodb配置
 MONGO_URI = 'localhost'
 MONGO_DB = 'bian_wallpaper'
 
