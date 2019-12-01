@@ -6,8 +6,6 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 import pymongo
 
-from scrapy.exceptions import DropItem
-
 
 class TextPipeline(object):
     """
@@ -15,15 +13,12 @@ class TextPipeline(object):
     """
     def process_item(self, item, spider):
         """
-        丢弃空值，删除多余的空白行
+        删除多余的空白行
         :param item:
         :param spider:
         :return:
         """
         for key, value in item.items():
-            if value == 'Not found':
-                return DropItem('Discard empty values')
-
             if isinstance(value, str):
                 item[key] = value.strip()
             elif isinstance(value, (tuple, list)):
