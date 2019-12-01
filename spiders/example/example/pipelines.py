@@ -22,7 +22,7 @@ class TextPipeline(object):
                 item['text'] = item['text'][:self.limit].rstrip() + '...'
             return item
         else:
-            return DropItem('Missing Text')  # 如果抛出此异常，会丢弃此Item，不再进行处理
+            raise DropItem('Missing Text')  # 如果抛出此异常，会丢弃此Item，不再进行处理
 
 
 class MongoPipeline(object):
