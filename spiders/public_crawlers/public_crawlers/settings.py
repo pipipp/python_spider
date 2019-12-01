@@ -70,11 +70,11 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'public_crawlers.pipelines.TextPipeline': 300,
-    # 'public_crawlers.pipelines.MongoPipeline': 400,
+    'public_crawlers.pipelines.MongoPipeline': 400,
 }
-# Bian_wallpaper Mongodb配置
+# Mongodb配置
 MONGO_URI = 'localhost'
-MONGO_DB = 'bian_wallpaper'
+MONGO_DB = 'public_crawler'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
