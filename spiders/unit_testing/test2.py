@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
+import time
 import random
 import requests
 import xlwt
 
 from pymongo import MongoClient
-from bs4 import BeautifulSoup
+from scrapy.selector import Selector
 
 
 class Crawler(object):
@@ -68,18 +69,13 @@ class Crawler(object):
     def main(self):
         resp = requests.get(self.source_url, headers={'User-Agent': self.random_user_agent()})
         if resp.status_code == 200:
-            print(resp.text)
+            selector = Selector(resp)
 
-            # TODO 使用Mongodb存储数据
-            # soup = BeautifulSoup(resp.text, 'lxml')
-            # p = soup.select('p')
-            # self.login_mongodb(database_name='ZhiHu', collection_name='Feynman learning method')
-            # for i, r in enumerate(p):
-            #     if not r.text:
-            #         continue
-            #     write_info = {'{}'.format(i): r.text}
-            #     self.collection.insert_one(write_info)
-            #     print('Write {} ok'.format(write_info))
+            all_wallpaper = selector.css('div.list ul li')
+            for index, info in enumerate(all_wallpaper):
+                print('index: {}'.format(index + 1))
+                after_url = 'http://www.netbian.com' + info.css('a::attr(href)').extract_first()
+                print('url: {}'.format(after_url))
 
         else:
             print('No data found!')
@@ -88,5 +84,5 @@ class Crawler(object):
 
 
 if __name__ == '__main__':
-    crawler = Crawler(url='https://www.zhihu.com/search?type=content&q=python')
+    crawler = Crawler(url='http://www.netbian.com/dongman1920_1080/index.htm')
     crawler.main()
