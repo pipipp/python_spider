@@ -10,8 +10,8 @@ import scrapy
 
 class BianItem(scrapy.Item):
     """
-    title      图片标题
-    images      图片链接
+    title       图片标题
+    image_url   图片链接
     """
     title = scrapy.Field()
-    images = scrapy.Field()
+    image_url = scrapy.Field()

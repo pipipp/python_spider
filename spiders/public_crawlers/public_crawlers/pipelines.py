@@ -6,6 +6,10 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 import pymongo
 
+from scrapy.exceptions import DropItem
+from scrapy.http import Request
+from scrapy.pipelines.images import ImagesPipeline
+
 
 class TextPipeline(object):
     """
@@ -13,17 +17,60 @@ class TextPipeline(object):
     """
     def process_item(self, item, spider):
         """
-        删除多余的空白行
+        丢弃空的值，删除多余的空白行
         :param item:
         :param spider:
         :return:
         """
         for key, value in item.items():
+            if not value:
+                raise DropItem('Discard empty values')
+
             if isinstance(value, str):
                 item[key] = value.strip()
             elif isinstance(value, (tuple, list)):
                 item[key] = [i.strip() for i in value]
         return item
+
+
+class ImagePipeline(ImagesPipeline):
+    """
+    图片下载
+    """
+    def file_path(self, request, response=None, info=None):
+        """
+        截取图片链接的最后一部分当作文件名
+        :param request:
+        :param response:
+        :param info:
+        :return:
+        """
+        url = request.url
+        file_name = url.split('/')[-1]
+        return file_name
+
+    def item_completed(self, results, item, info):
+        """
+        丢弃下载失败的Item
+        :param results:
+        :param item:
+        :param info:
+        :return:
+        """
+        image_paths = [x['path'] for ok, x in results if ok]
+        if not image_paths:
+            raise DropItem('Image downloaded failed')
+        return item
+
+    def get_media_requests(self, item, info):
+        """
+        构建新的Request下载图片
+        :param item:
+        :param info:
+        :return:
+        """
+        image_url = item['image_url']
+        yield Request(image_url)
 
 
 class MongoPipeline(object):
@@ -41,7 +88,7 @@ class MongoPipeline(object):
         """
         使用类方法，返回带有MONGO_URI和MONGO_DB值的类实例
         :param crawler:
-        :return: 类实例
+        :return:
         """
         return cls(
             mongo_uri=crawler.settings.get('MONGO_URI'),
@@ -59,7 +106,7 @@ class MongoPipeline(object):
 
     def process_item(self, item, spider):
         """
-        保存所有数据到Mongodb
+        插入数据到Mongodb
         :param item:
         :param spider:
         :return:

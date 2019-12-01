@@ -70,8 +70,11 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'public_crawlers.pipelines.TextPipeline': 300,
-    'public_crawlers.pipelines.MongoPipeline': 400,
+    'public_crawlers.pipelines.ImagePipeline': 301,
+    'public_crawlers.pipelines.MongoPipeline': 302,
 }
+# Images保存的路径
+IMAGES_STORE = './images'
 # Mongodb配置
 MONGO_URI = 'localhost'
 MONGO_DB = 'public_crawler'

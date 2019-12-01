@@ -27,7 +27,8 @@ class BianWallpaperSpider(scrapy.Spider):
         next_page = selector.xpath('//div[@class="page"]/a[last()]/@href').extract_first()
         next_url = 'http://' + self.allowed_domains[0] + next_page
         self.logger.info('Next url: {}'.format(next_url))
-        time.sleep(3)  # 加3秒延时，防止爬虫爬取过快导致页面丢失
+        # 加3秒延时，防止爬取过快导致页面丢失
+        time.sleep(3)
         yield Request(url=next_url, callback=self.parse)
 
     def save_wallpaper(self, response):
@@ -38,9 +39,6 @@ class BianWallpaperSpider(scrapy.Spider):
         """
         selector = Selector(response)
         item = BianItem()
-        title = selector.css('div.pic p a img::attr(title)').extract_first()
-        images = selector.css('div.pic p a img::attr(src)').extract_first()
-        if title and images:
-            item['title'] = title
-            item['images'] = images
-            yield item
+        item['title'] = selector.css('div.pic p a img::attr(title)').extract_first()
+        item['image_url'] = selector.css('div.pic p a img::attr(src)').extract_first()
+        yield item
