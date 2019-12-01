@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import time
 
 from ..items import BianItem
 from scrapy.http import Request
@@ -13,19 +14,33 @@ class BianWallpaperSpider(scrapy.Spider):
 
     def parse(self, response):
         """
-        解析HTML，保存图片
+        解析HTML
         :param response:
         :return:
         """
-        item = BianItem()
         selector = Selector(response)
-        all_wallpaper = selector.css('div.list ul li').extract()
+        all_wallpaper = selector.css('div.list ul li')
         for info in all_wallpaper:
-            print('info: {}'.format(info))
-            item['description'] = info.css('a img::src').extract_first()
-            item['image'] = info.css('a img::alt').extract_first()
-            yield item
+            after_url = 'http://' + self.allowed_domains[0] + info.css('a::attr(href)').extract_first()
+            yield Request(url=after_url, callback=self.save_wallpaper)
 
-        # next_url = self.start_urls[0]
-        # self.logger.info('Next url: {}'.format(next_url))
-        # yield Request(url=next_url, callback=self.get_each_url)
+        next_page = selector.xpath('//div[@class="page"]/a[last()]/@href').extract_first()
+        next_url = 'http://' + self.allowed_domains[0] + next_page
+        self.logger.info('Next url: {}'.format(next_url))
+        time.sleep(3)  # 加3秒延时，防止爬虫爬取过快导致页面丢失
+        yield Request(url=next_url, callback=self.parse)
+
+    def save_wallpaper(self, response):
+        """
+        保存高清壁纸链接
+        :param response:
+        :return:
+        """
+        selector = Selector(response)
+        item = BianItem()
+        title = selector.css('div.pic p a img::attr(title)').extract_first()
+        images = selector.css('div.pic p a img::attr(src)').extract_first()
+        if title and images:
+            item['title'] = title
+            item['images'] = images
+            yield item

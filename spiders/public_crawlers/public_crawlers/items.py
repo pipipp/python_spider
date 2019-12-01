@@ -10,8 +10,8 @@ import scrapy
 
 class BianItem(scrapy.Item):
     """
-    description      图片描述
-    image            图片链接
+    title      图片标题
+    images      图片链接
     """
-    description = scrapy.Field()
-    image = scrapy.Field()
+    title = scrapy.Field()
+    images = scrapy.Field()
