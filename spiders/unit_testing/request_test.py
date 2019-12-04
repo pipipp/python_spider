@@ -12,8 +12,8 @@ class Crawler(object):
     database = None
     collection = None
 
-    def __init__(self, url=''):
-        self.source_url = url
+    def __init__(self, source_url=''):
+        self.source_url = source_url
         self.session = requests.Session()
 
     @staticmethod
@@ -79,5 +79,6 @@ class Crawler(object):
 
 
 if __name__ == '__main__':
-    crawler = Crawler(url='https://zhuanlan.zhihu.com/p/88209825')
+    url = 'https://zhuanlan.zhihu.com/p/88209825'
+    crawler = Crawler(source_url=url)
     crawler.main()
