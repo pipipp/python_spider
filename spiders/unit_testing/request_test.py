@@ -18,6 +18,10 @@ class Crawler(object):
 
     @staticmethod
     def random_user_agent():
+        """
+        返回一个随机请求头
+        :return:
+        """
         ua_list = [
             # Chrome UA
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
