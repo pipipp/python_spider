@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for public_crawlers project
+# Scrapy settings for douban project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,11 +9,10 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'public_crawlers'
+BOT_NAME = 'douban'
 
-SPIDER_MODULES = ['public_crawlers.spiders']
-NEWSPIDER_MODULE = 'public_crawlers.spiders'
-
+SPIDER_MODULES = ['douban.trunk']
+NEWSPIDER_MODULE = 'douban.trunk'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
@@ -23,7 +22,8 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 ROBOTSTXT_OBEY = False
 
 # 设置编码格式
-FEED_EXPORT_ENCODING = 'utf-8'
+FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
+# FEED_EXPORT_ENCODING = 'gb18030'  # 在csv格式下转换中文编码
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -51,13 +51,13 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'public_crawlers.middlewares.PublicCrawlersSpiderMiddleware': 543,
+#    'douban.middlewares.DoubanSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'public_crawlers.middlewares.PublicCrawlersDownloaderMiddleware': 543,
+#    'douban.middlewares.DoubanDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -69,15 +69,12 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'public_crawlers.pipelines.TextPipeline': 300,
-    'public_crawlers.pipelines.ImagePipeline': 301,
-    'public_crawlers.pipelines.MongoPipeline': 302,
+    'douban.pipelines.DoubanPipeline': 300,
+    'douban.pipelines.MongoPipeline': 400,
 }
-# Images保存的路径
-IMAGES_STORE = './images'
 # Mongodb配置
 MONGO_URI = 'localhost'
-MONGO_DB = 'public_crawler'
+MONGO_DB = 'douban'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
