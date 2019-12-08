@@ -98,10 +98,9 @@ class Crawler(object):
             'Cookie': self.get_cookies(host_url),
         }
         data = {
-            'first': 'True',
-            'pn': 1,
+            'first': 'false',
+            'pn': 20,
             'kd': '爬虫开发工程师',
-            # 'sid': '2cc2060119c34d00adb71a76c352a272'
         }
         resp = requests.post(self.source_url, headers=headers, data=data)
         if resp.status_code == 200:

@@ -11,8 +11,8 @@
 
 BOT_NAME = 'douban'
 
-SPIDER_MODULES = ['douban.trunk']
-NEWSPIDER_MODULE = 'douban.trunk'
+SPIDER_MODULES = ['douban.spiders']
+NEWSPIDER_MODULE = 'douban.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \

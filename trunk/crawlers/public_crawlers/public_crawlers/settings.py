@@ -11,8 +11,8 @@
 
 BOT_NAME = 'public_crawlers'
 
-SPIDER_MODULES = ['public_crawlers.trunk']
-NEWSPIDER_MODULE = 'public_crawlers.trunk'
+SPIDER_MODULES = ['public_crawlers.spiders']
+NEWSPIDER_MODULE = 'public_crawlers.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

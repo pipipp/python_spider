@@ -11,8 +11,8 @@
 
 BOT_NAME = 'zhihu'
 
-SPIDER_MODULES = ['zhihu.trunk']
-NEWSPIDER_MODULE = 'zhihu.trunk'
+SPIDER_MODULES = ['zhihu.spiders']
+NEWSPIDER_MODULE = 'zhihu.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
