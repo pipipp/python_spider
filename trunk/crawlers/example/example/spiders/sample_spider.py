@@ -11,6 +11,10 @@ settings                   它是一个Settings对象，我们可以直接获取
 start_requests()           生成初始请求，必须返回一个可迭代对象，默认使用start_urls里的URL和GET请求，如需使用POST需要重写此方法
 parse()                    当Response没有指定回调函数时，该方法会默认被调用，该函数必须要返回一个包含Request或Item的可迭代对象
 closed()                   当Spider关闭时，该方法会被调用，可以在这里定义释放资源的一些操作或其他收尾操作
+
+Request属性：
+meta                       可以利用Request请求传入参数，在Response中可以取值，是一个字典类型
+cookies                    可以传入cookies信息，是一个字典类型
 """
 # -*- coding: utf-8 -*-
 import scrapy
@@ -38,11 +42,17 @@ class SampleSpider(scrapy.Spider):
         :param response: From the start_requests() function
         :return: 该函数必须要返回一个包含 Request 或 Item 的可迭代对象
         """
-        # TODO Response type
+        # TODO Request attribute
+        # print(response.request.url)  # 返回Request的URL
+        # print(response.request.headers)  # 返回Request的headers
+        # print(response.request.headers.getlist('Cookie'))  # 返回Request的cookies
+
+        # TODO Response attribute
         # print(response.text)  # 返回Response的HTML
         # print(response.body)  # 返回Response的二进制格式HTML
         # print(response.url)  # 返回Response的URL
         # print(response.headers)  # 返回Response的headers
+        # print(response.headers.getlist('Set-Cookie'))  # 返回Response的cookies
         # json.loads(response.text)  # 获取AJAX数据，返回一个字典
 
         # TODO 使用Selector选择器
@@ -52,7 +62,9 @@ class SampleSpider(scrapy.Spider):
         # selector.xpath('//a/text()').re('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的分组列表
         # selector.xpath('//a/text()').re_first('Name:\s(.*)')  # 使用xpath选择器 + 正则表达式解析，返回正则匹配的第一个结果
 
-        # print(self.settings.get('USER_AGENT'))  # 从settings.py获取全局配置信息
+        # TODO 从settings.py中获取全局配置信息
+        # print(self.settings.get('USER_AGENT'))
+
         quotes = response.css('.quote')  # 使用css选择器，返回一个SelectorList类型的列表
         item = ExampleItem()
         for quote in quotes:
