@@ -1,5 +1,5 @@
 import json
-from urllib.parse import unquote
+from urllib.parse import urlencode, quote, unquote
 
 
 def read_json_data(file_name='json_file.json'):
@@ -20,5 +20,5 @@ def read_json_data(file_name='json_file.json'):
 if __name__ == '__main__':
     # result = read_json_data(file_name=r'C:\Evan\my_programs\scrapy_code\trunk\public_crawlers\bian_wallpaper.json')
 
-    url = 'https://www.lagou.com/jobs/list_%E7%88%AC%E8%99%AB%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88'
+    url = 'https://www.lagou.com/jobs/positionAjax.json?city=%E6%B7%B1%E5%9C%B3&needAddtionalResult=false'
     print(unquote(url))
