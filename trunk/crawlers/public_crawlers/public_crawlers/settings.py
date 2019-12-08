@@ -68,13 +68,23 @@ FEED_EXPORT_ENCODING = 'utf-8'
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+
+# TODO For bian_wallpaper.py ITEM_PIPELINES
+# ITEM_PIPELINES = {
+#     'public_crawlers.pipelines.TextPipeline': 300,
+#     'public_crawlers.pipelines.ImagePipeline': 301,
+#     'public_crawlers.pipelines.MongoPipeline': 302,
+# }
+# # Images保存的路径
+# IMAGES_STORE = './images'
+
+# TODO For lagou.py ITEM_PIPELINES
 ITEM_PIPELINES = {
     'public_crawlers.pipelines.TextPipeline': 300,
-    'public_crawlers.pipelines.ImagePipeline': 301,
-    'public_crawlers.pipelines.MongoPipeline': 302,
+    # 'public_crawlers.pipelines.MongoPipeline': 302,
 }
-# Images保存的路径
-IMAGES_STORE = './images'
+
+
 # Mongodb配置
 MONGO_URI = 'localhost'
 MONGO_DB = 'public_crawler'

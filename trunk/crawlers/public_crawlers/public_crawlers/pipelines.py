@@ -69,7 +69,7 @@ class ImagePipeline(ImagesPipeline):
         :param info:
         :return:
         """
-        image_url = item['image_url']
+        image_url = item['image_url']  # TODO 填入图片的下载链接地址
         yield Request(image_url)
 
 
