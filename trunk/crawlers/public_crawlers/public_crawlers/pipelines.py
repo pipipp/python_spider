@@ -17,15 +17,12 @@ class TextPipeline(object):
     """
     def process_item(self, item, spider):
         """
-        丢弃空的值，删除多余的空白行
+        删除两边多余的空白行
         :param item:
         :param spider:
         :return:
         """
         for key, value in item.items():
-            if not value:
-                raise DropItem('Discard empty values')
-
             if isinstance(value, str):
                 item[key] = value.strip()
             elif isinstance(value, (tuple, list)):

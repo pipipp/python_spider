@@ -39,7 +39,7 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-# TODO 使用带Cookies的请求
+# TODO 如果设置为True则可以手动添加Cookies参数到Request请求中
 COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)

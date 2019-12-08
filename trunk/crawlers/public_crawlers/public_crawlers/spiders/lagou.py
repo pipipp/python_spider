@@ -20,54 +20,89 @@ class BianWallpaperSpider(scrapy.Spider):
 
     def start_requests(self):
         """
-        构造初始请求
+        构造初始请求，获取拉钩网首页Cookies
         :return:
         """
-        self.start_url = self.start_url.format(quote(self.SEARCH_INFO))
-        return [Request(url=self.start_url, callback=self.after_requests)]
-
-    def get_cookies(self, response):
-        """
-        获取当前response的cookies
-        :param response:
-        :return: str(cookies)
-        """
-        # 因为请求头中cookies的类型为字符串，所以将字典转化为字符串类型
-        cookies = ''
-        for key, value in response.cookies.get_dict().items():
-            cookies += (key + '=' + value + '; ')
-        return cookies
+        return [Request(url=self.start_url.format(quote(self.SEARCH_INFO)), callback=self.after_requests)]
 
     def after_requests(self, response):
         """
-        获取初始界面的cookies，构建后续的AJAX请求
+        构造获取招聘岗位信息的AJAX请求，默认开始为第一页
         :param response:
         :return:
         """
-        cookies = self.get_cookies(response)
+        data = {
+            'first': 'false',
+            'pn': '1',  # 页数
+            'kd': self.SEARCH_INFO
+        }
+        yield FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), formdata=data,
+                          meta={'page': 1}, callback=self.parse_company)
 
-        for index in range(1, 2):
-            headers = {
-                'User-Agent': self.settings['USER_AGENT'],
-                'Referer': self.start_url,
-                'Cookie': cookies
-            }
-            data = {
-                'first': 'false',
-                'pn': index,
-                'kd': '爬虫开发工程师',
-            }
-            self.search_url = self.search_url.format(quote(self.CITY_INFO))
-            yield FormRequest(url=self.search_url, method='POST', headers=headers, formdata=data, callback=self.parse)
-
-    def parse(self, response):
+    def parse_company(self, response):
         """
-        解析HTML
+        解析公司信息
         :param response:
         :return:
         """
         result = json.loads(response.text)['content']['positionResult']['result']
         if result:
-            print(result)
-        else:
-            pass
+            for each_company in result:
+                company_details = dict(
+                    position_name=each_company.get('positionName'),
+                    company_fullname=each_company.get('companyFullName'),
+                    company_size=each_company.get('companySize'),
+                    company_label_list=[str(i) for i in each_company.get('companyLabelList', [])],
+                    industry_field=each_company.get('industryField'),
+                    finance_stage=each_company.get('financeStage'),
+                    city=each_company.get('city'),
+                    district=each_company.get('district'),
+                    salary=each_company.get('salary'),
+                    work_year=each_company.get('workYear'),
+                    job_nature=each_company.get('jobNature'),
+                    education=each_company.get('education'),
+                    position_advantage=each_company.get('positionAdvantage'),
+                    line_station=each_company.get('linestaion'),
+                )
+                html_id = each_company.get('positionId')
+                show_id = json.loads(response.text)['content']['showId']
+                next_url = 'https://www.lagou.com/jobs/{}.html?show={}'.format(html_id, show_id)
+                # 保存当前页面信息
+                yield Request(url=next_url, meta={'company_details': company_details},
+                              callback=self.parse_job)
+                # 进行下一页的请求
+                next_page = response.meta['page'] + 1
+                data = {
+                    'first': 'false',
+                    'pn': str(next_page),  # 页数每次增加1
+                    'kd': self.SEARCH_INFO
+                }
+                yield FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), formdata=data,
+                                  meta={'page': next_page}, callback=self.parse_company)
+
+    def parse_job(self, response):
+        """
+        解析工作地址和职位描述
+        :return:
+        """
+        item = LagouItem()
+        company_details = response.meta['company_details']
+        # 职位信息
+        item['position_name'] = company_details['position_name']
+        item['salary'] = company_details['salary']
+        item['education'] = company_details['education']
+        item['work_year'] = company_details['work_year']
+        item['job_nature'] = company_details['job_nature']
+        item['position_advantage'] = company_details['position_advantage']
+        item['position_description'] = ''.join(response.css('div .job-detail ::text').extract())
+        # 公司信息
+        item['work_address'] = response.css('div .work_addr ::text').extract()[-3]
+        item['line_station'] = company_details['line_station']
+        item['city'] = company_details['city']
+        item['district'] = company_details['district']
+        item['company_fullname'] = company_details['company_fullname']
+        item['company_size'] = company_details['company_size']
+        item['company_label_list'] = company_details['company_label_list']
+        item['industry_field'] = company_details['industry_field']
+        item['finance_stage'] = company_details['finance_stage']
+        yield item
