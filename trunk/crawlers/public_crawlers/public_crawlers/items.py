@@ -19,6 +19,8 @@ class BianItem(scrapy.Item):
 
 class LagouItem(scrapy.Item):
     """
+    company_fullname         公司名称
+    work_address             工作地址
     position_name            职位名称
     salary                   薪水
     education                学历要求
@@ -26,16 +28,15 @@ class LagouItem(scrapy.Item):
     job_nature               工作性质
     position_advantage       职位诱惑
     position_description     职位描述
-    work_address             工作地址
-    line_station             路线站点
     city                     城市
     district                 区域
-    company_fullname         公司名称
     company_size             公司人数
     company_label_list       公司标签
     industry_field           行业领域
     finance_stage            融资阶段
     """
+    company_fullname = scrapy.Field()
+    work_address = scrapy.Field()
     position_name = scrapy.Field()
     salary = scrapy.Field()
     education = scrapy.Field()
@@ -43,11 +44,8 @@ class LagouItem(scrapy.Item):
     job_nature = scrapy.Field()
     position_advantage = scrapy.Field()
     position_description = scrapy.Field()
-    work_address = scrapy.Field()
-    line_station = scrapy.Field()
     city = scrapy.Field()
     district = scrapy.Field()
-    company_fullname = scrapy.Field()
     company_size = scrapy.Field()
     company_label_list = scrapy.Field()
     industry_field = scrapy.Field()

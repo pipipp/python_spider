@@ -81,7 +81,7 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # TODO For lagou.py ITEM_PIPELINES
 ITEM_PIPELINES = {
     'public_crawlers.pipelines.TextPipeline': 300,
-    # 'public_crawlers.pipelines.MongoPipeline': 302,
+    'public_crawlers.pipelines.MongoPipeline': 302,
 }
 
 

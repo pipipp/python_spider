@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import time
+import scrapy
 import json
 
 from ..items import LagouItem
 from scrapy.http import Request, FormRequest
-from scrapy.selector import Selector
 from urllib.parse import quote
 
 
@@ -23,11 +22,12 @@ class BianWallpaperSpider(scrapy.Spider):
         构造初始请求，获取拉钩网首页Cookies
         :return:
         """
-        return [Request(url=self.start_url.format(quote(self.SEARCH_INFO)), callback=self.after_requests)]
+        self.start_url = self.start_url.format(quote(self.SEARCH_INFO))
+        return [Request(url=self.start_url, callback=self.after_requests)]
 
     def after_requests(self, response):
         """
-        构造获取招聘岗位信息的AJAX请求，默认开始为第一页
+        构造获取招聘岗位信息的AJAX请求
         :param response:
         :return:
         """
@@ -36,8 +36,8 @@ class BianWallpaperSpider(scrapy.Spider):
             'pn': '1',  # 页数
             'kd': self.SEARCH_INFO
         }
-        yield FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), formdata=data,
-                          meta={'page': 1}, callback=self.parse_company)
+        return [FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), formdata=data,
+                            meta={'page': 1}, callback=self.parse_company)]
 
     def parse_company(self, response):
         """
@@ -45,7 +45,25 @@ class BianWallpaperSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        result = json.loads(response.text)['content']['positionResult']['result']
+        if json.loads(response.text).get('msg'):
+            # 如果出现“您操作太频繁,请稍后再访问”的提示就等待3秒后再重新访问
+            time.sleep(3)
+            self.logger.error('Error msg: {}'.format(json.loads(response.text).get('msg')))
+            headers = {
+                'Referer': self.start_url
+            }
+            data = {
+                'first': 'false',
+                'pn': str(response.meta['page']),
+                'kd': self.SEARCH_INFO,
+                'sid': str(response.meta.get('sid'))
+            }
+            self.logger.warning('Now retry the page ({})'.format(response.meta['page']))
+            return [FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), headers=headers, formdata=data,
+                                meta={'page': response.meta['page']}, callback=self.parse_company)]
+
+        # 请求成功
+        result = json.loads(response.text)['content']['positionResult'].get('result')
         if result:
             for each_company in result:
                 company_details = dict(
@@ -62,23 +80,28 @@ class BianWallpaperSpider(scrapy.Spider):
                     job_nature=each_company.get('jobNature'),
                     education=each_company.get('education'),
                     position_advantage=each_company.get('positionAdvantage'),
-                    line_station=each_company.get('linestaion'),
+                    line_station=each_company.get('linestaion', 'None'),
                 )
                 html_id = each_company.get('positionId')
                 show_id = json.loads(response.text)['content']['showId']
                 next_url = 'https://www.lagou.com/jobs/{}.html?show={}'.format(html_id, show_id)
-                # 保存当前页面信息
-                yield Request(url=next_url, meta={'company_details': company_details},
-                              callback=self.parse_job)
-                # 进行下一页的请求
-                next_page = response.meta['page'] + 1
-                data = {
-                    'first': 'false',
-                    'pn': str(next_page),  # 页数每次增加1
-                    'kd': self.SEARCH_INFO
-                }
-                yield FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), formdata=data,
-                                  meta={'page': next_page}, callback=self.parse_company)
+                yield Request(url=next_url, meta={'company_details': company_details}, callback=self.parse_job)
+
+            # 进行下一页的请求
+            next_page = response.meta['page'] + 1
+            sid = json.loads(response.text)['content']['showId']
+            headers = {
+                'Referer': self.start_url
+            }
+            data = {
+                'first': 'false',
+                'pn': str(next_page),  # 页数每次增加1
+                'kd': self.SEARCH_INFO,
+                'sid': sid
+            }
+            self.logger.warning('Next page: {}'.format(next_page))
+            yield FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), headers=headers, formdata=data,
+                              meta={'page': next_page, 'sid': sid}, callback=self.parse_company)
 
     def parse_job(self, response):
         """
@@ -88,6 +111,9 @@ class BianWallpaperSpider(scrapy.Spider):
         item = LagouItem()
         company_details = response.meta['company_details']
         # 职位信息
+        item['company_fullname'] = company_details['company_fullname']
+        item['work_address'] = str(response.css('div .work_addr ::text').extract()[-3]).strip() + \
+                               '[' + str(company_details['line_station']).strip() + ']'
         item['position_name'] = company_details['position_name']
         item['salary'] = company_details['salary']
         item['education'] = company_details['education']
@@ -96,11 +122,8 @@ class BianWallpaperSpider(scrapy.Spider):
         item['position_advantage'] = company_details['position_advantage']
         item['position_description'] = ''.join(response.css('div .job-detail ::text').extract())
         # 公司信息
-        item['work_address'] = response.css('div .work_addr ::text').extract()[-3]
-        item['line_station'] = company_details['line_station']
         item['city'] = company_details['city']
         item['district'] = company_details['district']
-        item['company_fullname'] = company_details['company_fullname']
         item['company_size'] = company_details['company_size']
         item['company_label_list'] = company_details['company_label_list']
         item['industry_field'] = company_details['industry_field']
