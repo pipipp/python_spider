@@ -15,7 +15,7 @@ closed()                   当Spider关闭时，该方法会被调用，可以�
 Request属性：
 meta                       可以利用Request请求传入参数，在Response中可以取值，是一个字典类型
 cookies                    可以传入cookies信息，是一个字典类型
-dont_filter                如果需要多次提交表单，且URL一样，那么就必须设置为True，防止被当成重复网页过滤掉
+dont_filter                如果使用POST，需要多次提交表单，且URL一样，那么就必须设置为True，防止被当成重复网页过滤掉
 """
 # -*- coding: utf-8 -*-
 import scrapy

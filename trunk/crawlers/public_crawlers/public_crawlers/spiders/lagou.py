@@ -60,7 +60,7 @@ class BianWallpaperSpider(scrapy.Spider):
             }
             self.logger.warning('Now retry the page ({})'.format(response.meta['page']))
             return [FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), headers=headers, formdata=data,
-                                meta={'page': response.meta['page']}, callback=self.parse_company)]
+                                meta={'page': response.meta['page']}, dont_filter=True, callback=self.parse_company)]
 
         # 请求成功
         result = json.loads(response.text)['content']['positionResult'].get('result')
@@ -101,7 +101,7 @@ class BianWallpaperSpider(scrapy.Spider):
             }
             self.logger.warning('Next page: {}'.format(next_page))
             yield FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), headers=headers, formdata=data,
-                              meta={'page': next_page, 'sid': sid}, callback=self.parse_company)
+                              meta={'page': next_page, 'sid': sid}, dont_filter=True, callback=self.parse_company)
 
     def parse_job(self, response):
         """
