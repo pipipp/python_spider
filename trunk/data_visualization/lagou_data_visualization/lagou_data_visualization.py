@@ -71,9 +71,9 @@ def analysis(data, json_file_name):
     ]
     for info in data:
         salary = re.sub('k|K', '000', info['salary'], re.I).split('-')  # 把"k"转换为"000"，并分解为一个元组（最低薪，最高薪）
-        calculate = str(salary[0])  # 计算最低薪资
+        # calculate = str(salary[0])  # 计算最低薪资
         # calculate = str(salary[1])  # 计算最高薪资
-        # calculate = str((int(salary[0]) + int(salary[1])) // len(salary))  # 计算薪资平均值
+        calculate = str((int(salary[0]) + int(salary[1])) // len(salary))  # 计算薪资平均值
 
         for mapper in mapping:
             if mapper[0] in str(json_file_name).lower():
@@ -107,10 +107,10 @@ def main():
 
     if result:
         print('Final result length: {}\ndata: {}'.format(len(result), result))
-        plot(title='软件岗位最低薪资大比拼',
+        plot(title='软件岗位平均薪资大比拼',
              data_list=[item[1] for item in result],
              x_label=('深圳地区', [item[0] for item in result]),
-             y_label=('Salary', [5000, 25000]))
+             y_label=('Salary', [5000, 35000]))
 
 
 if __name__ == '__main__':
