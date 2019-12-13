@@ -11,8 +11,8 @@
 
 BOT_NAME = 'example'
 
-SPIDER_MODULES = ['example.spider']
-NEWSPIDER_MODULE = 'example.spider'
+SPIDER_MODULES = ['example.spiders']
+NEWSPIDER_MODULE = 'example.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # TODO 设置默认的用户代理请求头
