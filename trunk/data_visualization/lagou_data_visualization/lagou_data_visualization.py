@@ -3,7 +3,7 @@ import json
 import re
 import os
 
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 
 
 def read_json_data(file_name):
@@ -19,7 +19,7 @@ def read_json_data(file_name):
 
 def plot(title, data_list=[], x_label=(), y_label=()):
     """
-    绘图
+    绘柱形图
     :param str title: 图片标题
     :param list data_list: 数据列表
     :param tuple x_label: （X轴标签，X轴刻度标签）
@@ -30,31 +30,31 @@ def plot(title, data_list=[], x_label=(), y_label=()):
     plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
     plt.rcParams['axes.unicode_minus'] = False
 
-    item_range = range(len(data_list[0]))
-
+    item_range = range(len(data_list[0]))  # 计算所有数据的长度
     plt.title(title)  # 添加标题
+
+    # 绘X轴刻度的第一个柱形图（宽度0.4）
     plt.bar(item_range, data_list[0], align='center',
-            alpha=0.8, width=0.4)  # 绘柱形图
-    # 向右移动0.4
+            alpha=0.8, width=0.4)
+    # 向右移动0.4 绘X轴刻度的第二个柱形图（宽度0.4）
     plt.bar([i + 0.4 for i in item_range], data_list[1], align='center',
             color='y', alpha=0.8, width=0.4)
 
     plt.xlabel(x_label[0])  # 添加X轴标签
-    plt.xticks([i + 0.2 for i in item_range], x_label[1])  # 添加X轴刻度标签
+    plt.xticks([i + 0.2 for i in item_range], x_label[1])  # 添加X轴刻度标签（向右移动0.2居中摆放）
 
     plt.ylabel(y_label[0])  # 添加Y轴标签
     plt.ylim(y_label[1])  # 设置Y轴的刻度范围
 
-    # 为第一个条形图添加数值标签
+    # 为X轴刻度的第一个柱形图加数值标签
     for x, y in enumerate(data_list[0]):
         plt.text(x, y+100, '%s' % round(y, 1), ha='center')
-
-    # 为第二个条形图添加数值标签
+    # 向右移动0.4 为X轴刻度的第二个柱形图添加数值标签
     for x, y in enumerate(data_list[1]):
         plt.text(x + 0.4, y + 100, '%s' % round(y, 1), ha='center')
 
     plt.show()  # 显示图形
-    # plt.savefig('./123.jpg')  # 保存图片
+    # plt.savefig('./software_jobs.jpg')  # 保存图片
 
 
 def analysis(data, json_file_name):
@@ -98,7 +98,9 @@ def analysis(data, json_file_name):
             not_matched.append({info['position_name']: info['salary']})
 
     # if not_matched:
-    #     print('Not matched length: {}, data: {}'.format(len(not_matched), not_matched))
+    #     print('JSON file - ({}), not matched length: {}, data: {}'.format(json_file_name,
+    #                                                                       len(not_matched), not_matched))
+
     if matched:
         return [position_name + '\n({})'.format(len(matched)),
                 sum(i[0] for i in matched)//len(matched), sum(i[1] for i in matched)//len(matched)]
@@ -106,8 +108,7 @@ def analysis(data, json_file_name):
         return None
 
 
-def main():
-    root_path = r'C:\Evan\my_program\moon\trunk\data_visualization\lagou_data_visualization\json_file\\'
+def main(root_path):
     result = []
     for file in os.listdir(root_path):
         # print('Read the file: {}'.format(file))
@@ -118,11 +119,12 @@ def main():
 
     if result:
         print('Final result length: {}\ndata: {}'.format(len(result), result))
-        plot(title='2019软件岗位薪资大比拼',
+        plot(title='2019年软件岗位薪资大比拼',
              data_list=[[item[1] for item in result], [item[2] for item in result]],
              x_label=('深圳地区', [item[0] for item in result]),
              y_label=('Salary', [5000, 40000]))
 
 
 if __name__ == '__main__':
-    main()
+    path = r'./json_file'
+    main(root_path=path)
