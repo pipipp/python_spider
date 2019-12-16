@@ -37,11 +37,11 @@ def plot(title, data_list=[], x_label=(), y_label=()):
     plt.bar(item_range, data_list[0], align='center',
             alpha=0.8, width=0.4)
     # 向右移动0.4 绘X轴刻度的第二个柱形图（宽度0.4）
-    plt.bar([i + 0.4 for i in item_range], data_list[1], align='center',
+    plt.bar([i+0.4 for i in item_range], data_list[1], align='center',
             color='y', alpha=0.8, width=0.4)
 
     plt.xlabel(x_label[0])  # 添加X轴标签
-    plt.xticks([i + 0.2 for i in item_range], x_label[1])  # 添加X轴刻度标签（向右移动0.2居中摆放）
+    plt.xticks([i+0.2 for i in item_range], x_label[1])  # 添加X轴刻度标签（向右移动0.2居中摆放）
 
     plt.ylabel(y_label[0])  # 添加Y轴标签
     plt.ylim(y_label[1])  # 设置Y轴的刻度范围
@@ -51,7 +51,7 @@ def plot(title, data_list=[], x_label=(), y_label=()):
         plt.text(x, y+100, '%s' % round(y, 1), ha='center')
     # 向右移动0.4 为X轴刻度的第二个柱形图添加数值标签
     for x, y in enumerate(data_list[1]):
-        plt.text(x + 0.4, y + 100, '%s' % round(y, 1), ha='center')
+        plt.text(x+0.4, y+100, '%s' % round(y, 1), ha='center')
 
     plt.show()  # 显示图形
     # plt.savefig('./software_jobs.jpg')  # 保存图片
