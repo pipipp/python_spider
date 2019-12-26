@@ -8,7 +8,7 @@ from scrapy.http import Request, FormRequest
 from urllib.parse import quote
 
 
-class BianWallpaperSpider(scrapy.Spider):
+class LagouSpider(scrapy.Spider):
     name = 'lagou'
     allowed_domains = ['www.lagou.com']
     start_url = 'https://www.lagou.com/jobs/list_{}?labelWords=&fromSearch=true&suginput='
@@ -37,9 +37,9 @@ class BianWallpaperSpider(scrapy.Spider):
             'kd': self.SEARCH_INFO
         }
         return [FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), formdata=data,
-                            meta={'page': 1}, callback=self.parse_company)]
+                            meta={'page': 1}, callback=self.parse)]
 
-    def parse_company(self, response):
+    def parse(self, response):
         """
         解析公司信息
         :param response:
@@ -60,7 +60,7 @@ class BianWallpaperSpider(scrapy.Spider):
             }
             self.logger.warning('Now retry the page ({})'.format(response.meta['page']))
             return [FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), headers=headers, formdata=data,
-                                meta={'page': response.meta['page']}, dont_filter=True, callback=self.parse_company)]
+                                meta={'page': response.meta['page']}, dont_filter=True, callback=self.parse)]
 
         # 请求成功
         result = json.loads(response.text)['content']['positionResult'].get('result')
@@ -101,7 +101,7 @@ class BianWallpaperSpider(scrapy.Spider):
             }
             self.logger.warning('Next page: {}'.format(next_page))
             yield FormRequest(url=self.search_url.format(quote(self.CITY_INFO)), headers=headers, formdata=data,
-                              meta={'page': next_page, 'sid': sid}, dont_filter=True, callback=self.parse_company)
+                              meta={'page': next_page, 'sid': sid}, dont_filter=True, callback=self.parse)
 
     def parse_job(self, response):
         """
@@ -112,8 +112,8 @@ class BianWallpaperSpider(scrapy.Spider):
         company_details = response.meta['company_details']
         # 职位信息
         item['company_fullname'] = company_details['company_fullname']
-        item['work_address'] = str(response.css('div .work_addr ::text').extract()[-3]).strip() + \
-                               '[' + str(company_details['line_station']).strip() + ']'
+        item['work_address'] = str(response.css('div .work_addr ::text')
+                                   .extract()[-3]).strip() + '[' + str(company_details['line_station']).strip() + ']'
         item['position_name'] = company_details['position_name']
         item['salary'] = company_details['salary']
         item['education'] = company_details['education']
