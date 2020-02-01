@@ -70,7 +70,7 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
-# TODO For bian_wallpaper.py ITEM_PIPELINES
+# TODO This ITEM_PIPELINES is for bian_wallpaper.py
 # ITEM_PIPELINES = {
 #     'public_crawlers.pipelines.TextPipeline': 300,
 #     'public_crawlers.pipelines.ImagePipeline': 301,
@@ -79,7 +79,7 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # # Images保存的路径
 # IMAGES_STORE = './images'
 
-# TODO For lagou.py ITEM_PIPELINES
+# TODO This ITEM_PIPELINES is for lagou.py
 ITEM_PIPELINES = {
     'public_crawlers.pipelines.TextPipeline': 300,
     'public_crawlers.pipelines.MongoPipeline': 302,
