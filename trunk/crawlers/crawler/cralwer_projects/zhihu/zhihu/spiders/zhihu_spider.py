@@ -1,6 +1,5 @@
 """
-此爬虫是爬取知乎网上的信息
-在下面的SEARCH_INFO参数里面填入要搜索的信息，以及在LIMIT参数里面填入要抓取的文章数量运行即可
+爬取知乎网站的指定文章内容
 """
 # -*- coding: utf-8 -*-
 import scrapy
@@ -8,6 +7,8 @@ import re
 import json
 
 from ..items import ZhihuItem
+from ..constants import LIMIT, SEARCH_INFO
+
 from urllib.parse import urlencode
 from scrapy.http import Request
 from scrapy.selector import Selector
@@ -17,10 +18,7 @@ class ZhihuSpiderSpider(scrapy.Spider):
     name = 'zhihu_spider'
     allowed_domains = ['www.zhihu.com']
     start_urls = ['https://www.zhihu.com/search?']
-
-    ARTICLE_COUNTS = 0  # 当前文章数量总数
-    LIMIT = 50  # 文章数量获取限制
-    SEARCH_INFO = 'python'  # 要搜索的关键字填入这里
+    ARTICLE_COUNTS = 0
 
     def start_requests(self):
         """
@@ -29,7 +27,7 @@ class ZhihuSpiderSpider(scrapy.Spider):
         """
         params = {
             'type': 'content',
-            'q': self.SEARCH_INFO
+            'q': SEARCH_INFO
         }
         start_url = self.start_urls[0] + urlencode(params)
         return [Request(url=start_url, callback=self.after_requests)]
@@ -43,7 +41,7 @@ class ZhihuSpiderSpider(scrapy.Spider):
         search_hash_id = re.search(r'search_hash_id=(\w+?)&', response.text).group(1)
         params = {
             't': 'general',
-            'q': self.SEARCH_INFO,
+            'q': SEARCH_INFO,
             'correction': 1,
             'offset': 20,  # 偏移参数（每次增加20）
             'limit': 20,
@@ -63,9 +61,9 @@ class ZhihuSpiderSpider(scrapy.Spider):
         """
         item = ZhihuItem()
         for info in json.loads(response.text)['data']:
-            self.logger.info('ARTICLE_COUNTS is {}, LIMIT is {}'.format(self.ARTICLE_COUNTS, self.LIMIT))
+            self.logger.info('ARTICLE_COUNTS is {}, LIMIT is {}'.format(self.ARTICLE_COUNTS, LIMIT))
             self.ARTICLE_COUNTS += 1
-            if self.ARTICLE_COUNTS > self.LIMIT:
+            if self.ARTICLE_COUNTS > LIMIT:
                 break
 
             selector = Selector(text=info['highlight']['title'])
@@ -76,7 +74,7 @@ class ZhihuSpiderSpider(scrapy.Spider):
             item['article'] = '\n'.join(selector.xpath('//text()').extract())
             yield item
 
-        if self.ARTICLE_COUNTS < self.LIMIT:
+        if self.ARTICLE_COUNTS < LIMIT:
             offset = 'offset=' + str(int(re.search(r'offset=(\d+)', response.url).group(1)) + 20)
             lc_idx = 'lc_idx=' + str(int(re.search(r'lc_idx=(\d+)', response.url).group(1)) + 20)
             next_url = re.sub(r'lc_idx=\d+', lc_idx, re.sub(r'offset=\d+', offset, response.url))
