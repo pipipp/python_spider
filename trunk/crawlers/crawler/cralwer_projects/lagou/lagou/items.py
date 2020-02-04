@@ -10,11 +10,11 @@ import scrapy
 
 class LagouItem(scrapy.Item):
     """
-    company_fullname         公司名称
-    work_address             工作地址
     position_name            职位名称
     salary                   薪水
     education                学历要求
+    company_fullname         公司名称
+    work_address             工作地址
     work_year                工作年限
     job_nature               工作性质
     position_advantage       职位诱惑
@@ -26,11 +26,11 @@ class LagouItem(scrapy.Item):
     industry_field           行业领域
     finance_stage            融资阶段
     """
-    company_fullname = scrapy.Field()
-    work_address = scrapy.Field()
     position_name = scrapy.Field()
     salary = scrapy.Field()
     education = scrapy.Field()
+    company_fullname = scrapy.Field()
+    work_address = scrapy.Field()
     work_year = scrapy.Field()
     job_nature = scrapy.Field()
     position_advantage = scrapy.Field()

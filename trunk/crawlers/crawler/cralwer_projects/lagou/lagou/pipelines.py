@@ -7,7 +7,7 @@
 import pymongo
 
 
-class DoubanPipeline(object):
+class TextPipeline(object):
     """
     清洗过滤数据
     """

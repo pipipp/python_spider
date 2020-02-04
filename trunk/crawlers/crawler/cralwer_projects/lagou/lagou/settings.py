@@ -16,10 +16,15 @@ NEWSPIDER_MODULE = 'lagou.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'lagou (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
+             'Chrome/78.0.3904.108 Safari/537.36'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
+
+# 设置编码格式
+FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
+# FEED_EXPORT_ENCODING = 'gb18030'  # 在csv格式下转换中文编码
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -64,9 +69,14 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'lagou.pipelines.LagouPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'lagou.pipelines.TextPipeline': 300,
+    'lagou.pipelines.MongoPipeline': 400,
+}
+
+# Mongodb配置
+MONGO_URI = 'localhost'
+MONGO_DB = 'lagou'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
