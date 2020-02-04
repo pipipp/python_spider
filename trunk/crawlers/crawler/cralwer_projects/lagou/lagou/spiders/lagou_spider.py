@@ -1,3 +1,6 @@
+"""
+爬取拉钩网站的指定招聘信息
+"""
 # -*- coding: utf-8 -*-
 import time
 import scrapy
