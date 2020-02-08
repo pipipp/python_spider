@@ -1,3 +1,6 @@
+"""
+爬取彼岸壁纸网站的动漫系列壁纸(1920x1080)
+"""
 # -*- coding: utf-8 -*-
 import scrapy
 import time
