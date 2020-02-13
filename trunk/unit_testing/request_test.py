@@ -83,6 +83,6 @@ class Crawler(object):
 
 
 if __name__ == '__main__':
-    url = 'https://zhuanlan.zhihu.com/p/88209825'
+    url = 'https://www.baidu.com/'
     crawler = Crawler(source_url=url)
     crawler.main()
