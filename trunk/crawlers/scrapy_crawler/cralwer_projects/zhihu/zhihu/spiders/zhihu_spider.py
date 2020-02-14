@@ -13,6 +13,8 @@ from urllib.parse import urlencode
 from scrapy.http import Request
 from scrapy.selector import Selector
 
+__author__ = 'Evan'
+
 
 class ZhihuSpiderSpider(scrapy.Spider):
     name = 'zhihu_spider'

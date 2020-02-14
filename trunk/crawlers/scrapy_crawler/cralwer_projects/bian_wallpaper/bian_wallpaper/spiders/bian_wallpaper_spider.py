@@ -9,6 +9,8 @@ from ..items import BianWallpaperItem
 from scrapy.http import Request
 from scrapy.selector import Selector
 
+__author__ = 'Evan'
+
 
 class BianWallpaperSpider(scrapy.Spider):
     name = 'bian_wallpaper_spider'

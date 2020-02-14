@@ -7,6 +7,8 @@ import json
 import os
 from lxml import etree
 
+__author__ = 'Evan'
+
 
 class Crawler(object):
 

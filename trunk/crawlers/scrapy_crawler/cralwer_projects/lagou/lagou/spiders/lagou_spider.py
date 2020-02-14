@@ -12,6 +12,8 @@ from ..constants import SEARCH_INFO, CITY_INFO
 from scrapy.http import Request, FormRequest
 from urllib.parse import quote
 
+__author__ = 'Evan'
+
 
 class LagouSpider(scrapy.Spider):
     name = 'lagou_spider'

@@ -2,8 +2,9 @@
 import json
 import re
 import os
-
 from matplotlib import pyplot as plt
+
+__author__ = 'Evan'
 
 
 def read_json_data(file_name):

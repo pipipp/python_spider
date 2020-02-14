@@ -12,6 +12,8 @@ from ..constants import LIMIT, SEARCH_INFO
 from urllib.parse import urlencode, unquote
 from scrapy.http import Request
 
+__author__ = 'Evan'
+
 
 class DoubanSpiderSpider(scrapy.Spider):
     name = 'douban_spider'

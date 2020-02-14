@@ -24,6 +24,8 @@ from ..items import ExampleItem
 from scrapy.http import Request, FormRequest
 from scrapy import Selector
 
+__author__ = 'Evan'
+
 
 class SampleSpider(scrapy.Spider):
     name = 'sample_spider'  # 项目名称，具有唯一性不能同名
