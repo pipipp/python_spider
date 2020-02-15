@@ -1,5 +1,8 @@
+# -*- coding:utf-8 -*-
 import json
 from urllib.parse import urlencode, quote, unquote
+
+__author__ = 'Evan'
 
 
 def read_json_data(file_name='json_file.json'):

@@ -3,6 +3,7 @@ import threading
 
 from proxy_crawler.profile.proxy_spider import ProxySpider
 from proxy_crawler.profile.proxy_check import ProxyCheck
+
 from proxy_crawler.profile.settings import proxy_spider_settings
 from proxy_crawler.profile.settings import proxy_check_settings
 

@@ -11,9 +11,13 @@ import pymongo
 import threading
 import random
 import time
+import logging
 from lxml import etree
 
 __author__ = 'Evan'
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class ProxySpider(object):
@@ -67,7 +71,6 @@ class ProxySpider(object):
                 # 如果请求失败，重试一次
                 if resp.status_code != 200:
                     time.sleep(1)
-                    # print('Page: {} --> [Request error], try again...'.format(page))
                     resp = requests.get(self.config['PROXY_URL'].format(page),
                                         headers={'User-Agent': self.random_user_agent()})
 
@@ -85,7 +88,5 @@ class ProxySpider(object):
                     print('Page: {} --> Succeed'.format(page))
                 else:
                     print('Page: {} --> Failed, [Request error], status code: {}'.format(page, resp.status_code))
-                time.sleep(2)
             except Exception as ex:
                 print('Page: {} --> Failed, [Exception error], error msg: {}'.format(page, ex))
-                time.sleep(1)
