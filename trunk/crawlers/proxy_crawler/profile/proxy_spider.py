@@ -1,4 +1,5 @@
 """
+此类包含所有代理IP爬取的方法
 爬取代理网站的IP地址、端口号、协议类型保存到MongoDB数据库
 
 目前已写代理网站：
@@ -24,21 +25,22 @@ class ProxySpider(object):
 
     def __init__(self, config):
         self.config = config  # 全局配置文件
-        self.proxy_table = self._config_mongodb()  # 初始化Mongodb数据库
+        self.all_proxy_ip_table, self.valid_proxy_ip_table = self.config_mongodb()  # 初始化Mongodb数据库
         self.thread_pool = threading.Semaphore(value=self.config['THREAD_POOL_MAX'])  # 初始化线程池
 
     @staticmethod
-    def _config_mongodb(host='localhost', port=27017):
+    def config_mongodb(host='localhost', port=27017):
         """
         初始化Mongodb数据库
         :param host: 主机名
         :param port: 端口
-        :return: 返回集合句柄
+        :return: 返回两个集合句柄（所有代理IP表，有效代理IP表）
         """
         client = pymongo.MongoClient(host=host, port=port)
         database = client['proxy_info']
-        proxy_table = database['all_proxy_ip']
-        return proxy_table
+        all_proxy_ip_table = database['all_proxy_ip']
+        valid_proxy_ip_table = database['valid_proxy_ip']
+        return all_proxy_ip_table, valid_proxy_ip_table
 
     @staticmethod
     def random_user_agent():
@@ -82,9 +84,9 @@ class ProxySpider(object):
                     protocol_list = html.xpath('/html/body/div[1]/div[3]/div[2]/table/tbody/tr/td[2]/text()')
                     # 保存到MongoDB数据库
                     for ip, protocol in zip(ip_list, protocol_list):
-                        self.proxy_table.insert_one({"ip": ip.split(':')[0],
-                                                     "port": ip.split(':')[1],
-                                                     "protocol": protocol})
+                        self.all_proxy_ip_table.insert_one({"ip": ip.split(':')[0],
+                                                            "port": ip.split(':')[1],
+                                                            "protocol": protocol})
                     logger.info('Page: {} --> Succeed'.format(page))
                 else:
                     logger.info('Page: {} --> Failed, [Request error], status code: {}'.format(page, resp.status_code))
