@@ -15,7 +15,7 @@ import logging
 from lxml import etree
 
 __author__ = 'Evan'
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -85,8 +85,8 @@ class ProxySpider(object):
                         self.proxy_table.insert_one({"ip": ip.split(':')[0],
                                                      "port": ip.split(':')[1],
                                                      "protocol": protocol})
-                    print('Page: {} --> Succeed'.format(page))
+                    logger.info('Page: {} --> Succeed'.format(page))
                 else:
-                    print('Page: {} --> Failed, [Request error], status code: {}'.format(page, resp.status_code))
+                    logger.info('Page: {} --> Failed, [Request error], status code: {}'.format(page, resp.status_code))
             except Exception as ex:
-                print('Page: {} --> Failed, [Exception error], error msg: {}'.format(page, ex))
+                logger.info('Page: {} --> Failed, [Exception error], error msg: {}'.format(page, ex))

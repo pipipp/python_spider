@@ -4,6 +4,7 @@
 # -*- coding:utf-8 -*-
 import requests
 import pymongo
+import logging
 import threading
 import time
 
@@ -11,6 +12,7 @@ from proxy_crawler.profile.settings import proxy_check_settings
 from proxy_crawler.profile.proxy_spider import ProxySpider
 
 __author__ = 'Evan'
+logger = logging.getLogger(__name__)
 
 
 class ProxyCheck(ProxySpider):
