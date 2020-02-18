@@ -1,6 +1,5 @@
 """
 此类包含所有代理IP爬取的方法
-爬取代理网站的IP地址、端口号、协议类型保存到MongoDB数据库
 
 目前已写代理网站：
 西拉免费代理网站 --> get_xila_proxy_ip()
@@ -33,8 +32,8 @@ class ProxySpider(object):
         """
         初始化Mongodb数据库
         :param host: 主机名
-        :param port: 端口
-        :return: 返回两个集合句柄（所有代理IP表，有效代理IP表）
+        :param port: 端口号
+        :return: 返回两个集合句柄（所有代理IP集合，有效代理IP集合）
         """
         client = pymongo.MongoClient(host=host, port=port)
         database = client['proxy_info']
@@ -62,7 +61,8 @@ class ProxySpider(object):
 
     def get_xila_proxy_ip(self, page):
         """
-        获取西拉网站代理IP
+        URL - http://www.xiladaili.com/https/
+        爬取西拉代理网站的IP地址、端口号、协议类型、代理IP响应速度、代理IP得分保存到MongoDB数据库（all_proxy_ip集合）
         :param page: 爬取页数
         :return:
         """
@@ -70,7 +70,7 @@ class ProxySpider(object):
             try:
                 resp = requests.get(self.config['PROXY_URL'].format(page),
                                     headers={'User-Agent': self.random_user_agent()})
-                # 如果请求失败，重试一次
+                # 如果请求失败，再试一次
                 if resp.status_code != 200:
                     time.sleep(1)
                     resp = requests.get(self.config['PROXY_URL'].format(page),
@@ -78,17 +78,29 @@ class ProxySpider(object):
 
                 if resp.status_code == 200:
                     html = etree.HTML(resp.text)
-                    # 获取当前页所有代理IP和端口号
+                    # 获取所有代理IP和端口号
                     ip_list = html.xpath('/html/body/div[1]/div[3]/div[2]/table/tbody/tr/td[1]/text()')
-                    # 获取当前页所有代理协议
+                    # 获取所有代理协议
                     protocol_list = html.xpath('/html/body/div[1]/div[3]/div[2]/table/tbody/tr/td[2]/text()')
-                    # 保存到MongoDB数据库
-                    for ip, protocol in zip(ip_list, protocol_list):
-                        self.all_proxy_ip_table.insert_one({"ip": ip.split(':')[0],
-                                                            "port": ip.split(':')[1],
-                                                            "protocol": protocol})
-                    logger.info('Page: {} --> Succeed'.format(page))
+                    # 获取所有代理IP响应速度
+                    speed_list = html.xpath('/html/body/div[1]/div[3]/div[2]/table/tbody/tr/td[5]/text()')
+                    # 获取所有代理IP得分
+                    score_list = html.xpath('/html/body/div[1]/div[3]/div[2]/table/tbody/tr/td[8]/text()')
+                    for ip, protocol, speed, score in zip(ip_list, protocol_list, speed_list, score_list):
+                        # 过滤掉响应速度大于3或者代理得分小于10000的IP
+                        if float(speed) > 3.0 or int(score) < 10000:
+                            continue
+                        data = {
+                            "ip": ip.split(':')[0],
+                            "port": ip.split(':')[1],
+                            "protocol": protocol,
+                            "speed": speed,
+                            "score": score
+                        }
+                        # 数据去重，保存到all_proxy_ip集合
+                        self.all_proxy_ip_table.update_one(data, {"$set": data}, upsert=True)
+                    logger.debug('Page: {} --> The request is successful'.format(page))
                 else:
-                    logger.info('Page: {} --> Failed, [Request error], status code: {}'.format(page, resp.status_code))
+                    logger.debug('Page: {} --> Failed, [Request error], status code: {}'.format(page, resp.status_code))
             except Exception as ex:
-                logger.info('Page: {} --> Failed, [Exception error], error msg: {}'.format(page, ex))
+                logger.debug('Page: {} --> Failed, [Exception error], error msg: {}'.format(page, ex))
