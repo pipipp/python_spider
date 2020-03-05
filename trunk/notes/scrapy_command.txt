@@ -28,3 +28,8 @@
 scrapy crawl sample --nolog  # 不打印日志
 scrapy crawl sample --headers  # 打印响应头信息
 scrapy crawl sample --no-redirect  # 不做跳转（禁止重定向）
+
+<<shell调试>>
+python3 -m scrapy shell
+response.selector.xpath('')
+response.selector.css('')
