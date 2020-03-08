@@ -49,7 +49,7 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 #   'Accept-Language': 'en',
 #}
 
-# Enable or disable crawler middlewares
+# Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
 #    'zhihu.middlewares.ZhihuSpiderMiddleware': 543,

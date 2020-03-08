@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for example project
+# Scrapy settings for lagou project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,21 +9,20 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'example'
+BOT_NAME = 'lagou'
 
-SPIDER_MODULES = ['example.spiders']
-NEWSPIDER_MODULE = 'example.spiders'
+SPIDER_MODULES = ['lagou.spiders']
+NEWSPIDER_MODULE = 'lagou.spiders'
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# TODO 设置默认的用户代理请求头
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
              'Chrome/78.0.3904.108 Safari/537.36'
 
 # Obey robots.txt rules
-# TODO 不请求Robots协议
 ROBOTSTXT_OBEY = False
 
-# TODO 设置编码格式
+# 设置编码格式
 FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # FEED_EXPORT_ENCODING = 'gb18030'  # 在csv格式下转换中文编码
 
@@ -39,8 +38,7 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-# TODO 如果设置为True则可以手动添加Cookies参数到Request请求中
-COOKIES_ENABLED = True
+#COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -51,18 +49,17 @@ COOKIES_ENABLED = True
 #   'Accept-Language': 'en',
 #}
 
-# Enable or disable crawler middlewares
+# Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'example.middlewares.ExampleSpiderMiddleware': 543,
+#    'lagou.middlewares.LagouSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# TODO 使用下载中间件，设置随机请求头
-DOWNLOADER_MIDDLEWARES = {
-   'example.middlewares.RandomUserAgentMiddleware': 543,
-}
+#DOWNLOADER_MIDDLEWARES = {
+#    'lagou.middlewares.LagouDownloaderMiddleware': 543,
+#}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -72,14 +69,14 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# TODO 使用项目管道，过滤和保存数据（字典的value越小，优先级越高，如下所示：300优先级 > 400优先级）
 ITEM_PIPELINES = {
-   'example.pipelines.TextPipeline': 300,
-   'example.pipelines.MongoPipeline': 400,
+    'lagou.pipelines.TextPipeline': 300,
+    'lagou.pipelines.MongoPipeline': 400,
 }
-# TODO Mongodb配置
+
+# Mongodb配置
 MONGO_URI = 'localhost'
-MONGO_DB = 'example'
+MONGO_DB = 'lagou'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Define here the models for your crawler middleware
+# Define here the models for your spider middleware
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
@@ -36,12 +36,12 @@ class RandomUserAgentMiddleware(object):
 
 class ExampleSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
-    # scrapy acts as if the crawler middleware does not modify the
+    # scrapy acts as if the spider middleware does not modify the
     # passed objects.
 
     @classmethod
     def from_crawler(cls, crawler):
-        # This method is used by Scrapy to create your crawler.
+        # This method is used by Scrapy to create your spider.
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
@@ -53,8 +53,8 @@ class ExampleSpiderMiddleware(object):
         :param spider:
         :return:
         """
-        # Called for each response that goes through the crawler
-        # middleware and into the crawler.
+        # Called for each response that goes through the spider
+        # middleware and into the spider.
 
         # Should return None or raise an exception.
         return None
@@ -75,8 +75,8 @@ class ExampleSpiderMiddleware(object):
             yield i
 
     def process_spider_exception(self, response, exception, spider):
-        # Called when a crawler or process_spider_input() method
-        # (from other crawler middleware) raises an exception.
+        # Called when a spider or process_spider_input() method
+        # (from other spider middleware) raises an exception.
 
         # Should return either None or an iterable of Request, dict
         # or Item objects.
@@ -89,7 +89,7 @@ class ExampleSpiderMiddleware(object):
         :param spider:
         :return:
         """
-        # Called with the start requests of the crawler, and works
+        # Called with the start requests of the spider, and works
         # similarly to the process_spider_output() method, except
         # that it doesn’t have a response associated.
 
@@ -108,7 +108,7 @@ class ExampleDownloaderMiddleware(object):
 
     @classmethod
     def from_crawler(cls, crawler):
-        # This method is used by Scrapy to create your crawler.
+        # This method is used by Scrapy to create your spider.
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s

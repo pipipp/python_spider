@@ -5,7 +5,7 @@
 import requests
 import logging
 import time
-from proxy_crawler.profile.proxy_spider import ProxySpider
+from proxy_spider.profile.proxy_spider import ProxySpider
 
 __author__ = 'Evan'
 logger = logging.getLogger(__name__)

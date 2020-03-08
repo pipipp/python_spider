@@ -1,15 +1,15 @@
 """
-代理爬虫和代理验证程序执行者
+代理爬虫和代理验证执行模块
 """
 # -*- coding:utf-8 -*-
 import threading
 import logging
 
-from proxy_crawler.profile.proxy_spider import ProxySpider
-from proxy_crawler.profile.proxy_check import ProxyCheck
+from proxy_spider.profile.proxy_spider import ProxySpider
+from proxy_spider.profile.proxy_check import ProxyCheck
 
-from proxy_crawler.profile.settings import proxy_spider_settings
-from proxy_crawler.profile.settings import proxy_check_settings
+from proxy_spider.profile.settings import proxy_spider_settings
+from proxy_spider.profile.settings import proxy_check_settings
 
 __author__ = 'Evan'
 logger = logging.getLogger(__name__)

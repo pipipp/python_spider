@@ -4,7 +4,7 @@ name                       爬虫名称，它必须是唯一的，用来启动�
 allowed_domains            允许爬取的域名，是可选配置
 start_urls                 起始URL列表，当没有重写start_requests()方法时，默认使用这个列表
 custom_settings            它是一个字典，专属与本Spider的配置，此设置会覆盖项目全局的设置，必须在初始化前被更新，必须定义成类变量
-crawler                    它是由from_crawler()方法设置的，代表本Spider类对应的Crawler对象，可以获取项目的全局配置信息
+spider                    它是由from_crawler()方法设置的，代表本Spider类对应的Crawler对象，可以获取项目的全局配置信息
 settings                   它是一个Settings对象，我们可以直接获取项目的全局设置变量
 
 方法：                      含义:
