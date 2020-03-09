@@ -65,7 +65,7 @@ class MongoPipeline(object):
         :return:
         """
         name = item.__class__.__name__
-        self.db[name].insert_one(dict(item))
+        self.db[name].update_one(item, {"$set": item}, upsert=True)  # 数据去重
         return item
 
     def close_spider(self, spider):

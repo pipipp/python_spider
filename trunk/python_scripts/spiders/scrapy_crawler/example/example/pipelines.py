@@ -65,7 +65,7 @@ class MongoPipeline(object):
         :return: 必须返回 Item 类型的值或者抛出一个 DropItem 异常
         """
         name = item.__class__.__name__  # 创建一个集合，name='ExampleItem'
-        self.db[name].insert_one(dict(item))  # 插入数据到ExampleItem集合中
+        self.db[name].update_one(item, {"$set": item}, upsert=True)  # 数据去重
         return item
 
     def close_spider(self, spider):
