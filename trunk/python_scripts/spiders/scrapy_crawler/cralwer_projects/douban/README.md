@@ -16,6 +16,6 @@
 
 ![MongoDB数据库](https://github.com/pipipp/python_spider/blob/master/trunk/python_scripts/spiders/scrapy_crawler/cralwer_projects/douban/images/douban_MongoDB.PNG)
 
-*--result*
+*--result* (TXT)
 
 ![wallpapers](https://github.com/pipipp/python_spider/blob/master/trunk/python_scripts/spiders/scrapy_crawler/cralwer_projects/douban/images/douban_folder.PNG)
