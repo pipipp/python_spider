@@ -4,6 +4,6 @@
 * 填写完配置参数后直接运行main.py即可
 
 执行过程--
-* 首先用多线程爬取西拉网站的代理IP到MongoDB数据库(all_proxy_ip集合)
-* 然后再开启一个多线程验证所有代理IP中的有效IP（以访问百度网址为例）
-* 验证完毕后将所有有效代理IP保存到MongoDB数据库(valid_proxy_ip集合)
+1. 首先开启一个多线程爬取西拉网站的代理IP到MongoDB数据库(all_proxy_ip集合)
+2. 然后再开启一个多线程验证所有代理IP中的有效IP（以访问百度网址为例）
+3. 验证完毕后将所有有效代理IP保存到MongoDB数据库(valid_proxy_ip集合)
