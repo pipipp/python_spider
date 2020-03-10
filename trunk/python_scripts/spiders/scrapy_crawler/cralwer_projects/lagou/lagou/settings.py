@@ -23,8 +23,8 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 ROBOTSTXT_OBEY = False
 
 # 设置编码格式
-FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
-# FEED_EXPORT_ENCODING = 'gb18030'  # 在csv格式下转换中文编码
+# FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
+FEED_EXPORT_ENCODING = 'gb18030'  # 在csv格式下转换中文编码
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
