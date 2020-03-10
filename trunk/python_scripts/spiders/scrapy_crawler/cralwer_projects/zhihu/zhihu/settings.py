@@ -58,7 +58,7 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'zhihu.middlewares.ZhihuDownloaderMiddleware': 543,
+#    'zhihu.middlewares.ZhihuDownloaderMiddleware': 100,
 #}
 
 # Enable or disable extensions
@@ -71,7 +71,8 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'zhihu.pipelines.ZhihuPipeline': 300,
-    'zhihu.pipelines.MongoPipeline': 400,
+    'zhihu.pipelines.SaveDataPipeline': 301,
+    'zhihu.pipelines.MongoPipeline': 302,
 }
 # Mongodb配置
 MONGO_URI = 'localhost'

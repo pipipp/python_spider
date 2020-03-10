@@ -56,9 +56,9 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'douban.middlewares.DoubanDownloaderMiddleware': 543,
-#}
+# DOWNLOADER_MIDDLEWARES = {
+#    'douban.middlewares.DoubanDownloaderMiddleware': 100,
+# }
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -70,7 +70,8 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'douban.pipelines.DoubanPipeline': 300,
-    'douban.pipelines.MongoPipeline': 400,
+    'douban.pipelines.SaveDataPipeline': 301,
+    'douban.pipelines.MongoPipeline': 302,
 }
 # Mongodb配置
 MONGO_URI = 'localhost'

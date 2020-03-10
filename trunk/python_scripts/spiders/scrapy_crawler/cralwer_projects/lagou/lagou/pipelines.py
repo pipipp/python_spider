@@ -5,6 +5,8 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 import pymongo
+import re
+import os
 
 
 class TextPipeline(object):
@@ -28,7 +30,7 @@ class TextPipeline(object):
 
 class MongoPipeline(object):
     """
-    保存所有数据到Mongodb
+    保存爬虫数据到Mongodb
     """
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
@@ -65,7 +67,8 @@ class MongoPipeline(object):
         :return:
         """
         name = item.__class__.__name__
-        self.db[name].update_one(item, {"$set": item}, upsert=True)  # 数据去重
+        items = dict(item)
+        self.db[name].update_one(items, {"$set": items}, upsert=True)  # 数据去重
         return item
 
     def close_spider(self, spider):

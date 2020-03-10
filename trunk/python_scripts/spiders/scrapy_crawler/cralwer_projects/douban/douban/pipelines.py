@@ -5,6 +5,8 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 import pymongo
+import re
+import os
 
 
 class DoubanPipeline(object):
@@ -28,7 +30,7 @@ class DoubanPipeline(object):
 
 class MongoPipeline(object):
     """
-    保存所有数据到Mongodb
+    保存爬虫数据到Mongodb
     """
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
@@ -65,7 +67,8 @@ class MongoPipeline(object):
         :return:
         """
         name = item.__class__.__name__
-        self.db[name].update_one(item, {"$set": item}, upsert=True)  # 数据去重
+        items = dict(item)
+        self.db[name].update_one(items, {"$set": items}, upsert=True)  # 数据去重
         return item
 
     def close_spider(self, spider):
@@ -75,3 +78,24 @@ class MongoPipeline(object):
         :return:
         """
         self.client.close()
+
+
+class SaveDataPipeline(object):
+    """
+    保存爬虫数据到本地
+    """
+    def __init__(self):
+        self.record_folder = os.getcwd() + '\\' + 'result'
+
+    def process_item(self, item, spider):
+        """
+        保存所有文章到result目录下
+        :param item:
+        :param spider:
+        :return:
+        """
+        items = dict(item)
+        title = re.match('[\u4e00-\u9fa5a-zA-Z0-9]+', items['title'])  # 只匹配字符串中的中文，字母，数字
+        with open(r'{}\{}.txt'.format(self.record_folder, title.group()), 'w', encoding='utf-8') as wf:
+            wf.write(item['article'])
+        return item

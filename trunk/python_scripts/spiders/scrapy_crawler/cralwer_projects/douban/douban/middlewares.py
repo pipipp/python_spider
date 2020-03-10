@@ -4,7 +4,8 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-
+import random
+import pymongo
 from scrapy import signals
 
 
@@ -68,25 +69,32 @@ class DoubanDownloaderMiddleware(object):
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
 
-    def process_request(self, request, spider):
-        # Called for each request that goes through the downloader
-        # middleware.
+    @staticmethod
+    def get_random_proxy():
+        """
+        从MongoDB数据库中随机取出一个代理IP
+        :return:
+        """
+        client = pymongo.MongoClient(host='localhost', port=27017)
+        database = client['proxy_info']
+        valid_proxy_ip_table = database['valid_proxy_ip']
+        random_proxy = random.choice([i for i in valid_proxy_ip_table.find()])
+        print('Get random proxy: {}'.format(random_proxy))
+        return 'https://{}:{}'.format(random_proxy['ip'], random_proxy['port'])
 
-        # Must either:
-        # - return None: continue processing this request
-        # - or return a Response object
-        # - or return a Request object
-        # - or raise IgnoreRequest: process_exception() methods of
-        #   installed downloader middleware will be called
-        return None
+    def process_request(self, request, spider):
+        # TODO 对request对象加上proxy
+        # proxy = self.get_random_proxy()
+        # request.meta['proxy'] = proxy
+        pass
 
     def process_response(self, request, response, spider):
-        # Called with the response returned from the downloader.
-
-        # Must either;
-        # - return a Response object
-        # - return a Request object
-        # - or raise IgnoreRequest
+        # 对返回的response处理
+        if response.status != 200:
+            # 换一个proxy，继续请求
+            proxy = self.get_random_proxy()
+            request.meta['proxy'] = proxy
+            return request
         return response
 
     def process_exception(self, request, exception, spider):

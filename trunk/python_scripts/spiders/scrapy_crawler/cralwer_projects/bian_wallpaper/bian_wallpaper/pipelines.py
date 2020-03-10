@@ -17,7 +17,7 @@ class TextPipeline(object):
     """
     def process_item(self, item, spider):
         """
-        删除两边多余的空白行
+        删除多余的空白行
         :param item:
         :param spider:
         :return:
@@ -72,7 +72,7 @@ class ImagePipeline(ImagesPipeline):
 
 class MongoPipeline(object):
     """
-    保存所有数据到Mongodb
+    保存爬虫数据到Mongodb
     """
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
@@ -85,7 +85,7 @@ class MongoPipeline(object):
         """
         使用类方法，返回带有MONGO_URI和MONGO_DB值的类实例
         :param crawler:
-        :return:
+        :return: 类实例
         """
         return cls(
             mongo_uri=crawler.settings.get('MONGO_URI'),
@@ -103,13 +103,14 @@ class MongoPipeline(object):
 
     def process_item(self, item, spider):
         """
-        插入数据到Mongodb
+        保存所有数据到Mongodb
         :param item:
         :param spider:
         :return:
         """
         name = item.__class__.__name__
-        self.db[name].update_one(item, {"$set": item}, upsert=True)  # 数据去重
+        items = dict(item)
+        self.db[name].update_one(items, {"$set": items}, upsert=True)  # 数据去重
         return item
 
     def close_spider(self, spider):

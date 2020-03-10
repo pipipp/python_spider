@@ -58,7 +58,7 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'lagou.middlewares.LagouDownloaderMiddleware': 543,
+#    'lagou.middlewares.LagouDownloaderMiddleware': 100,
 #}
 
 # Enable or disable extensions
@@ -71,7 +71,7 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 在json格式下转换中文编码
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'lagou.pipelines.TextPipeline': 300,
-    'lagou.pipelines.MongoPipeline': 400,
+    'lagou.pipelines.MongoPipeline': 302,
 }
 
 # Mongodb配置
