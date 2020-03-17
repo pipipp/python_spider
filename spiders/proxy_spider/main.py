@@ -5,11 +5,11 @@
 import threading
 import logging
 
-from spiders.proxy_spider.profile import ProxySpider
-from spiders.proxy_spider.profile import ProxyCheck
+from spiders.proxy_spider.profile.proxy_spider import ProxySpider
+from spiders.proxy_spider.profile.proxy_check import ProxyCheck
 
-from spiders.proxy_spider.profile import proxy_spider_settings
-from spiders.proxy_spider.profile import proxy_check_settings
+from spiders.proxy_spider.profile.settings import proxy_spider_settings
+from spiders.proxy_spider.profile.settings import proxy_check_settings
 
 __author__ = 'Evan'
 logger = logging.getLogger(__name__)
