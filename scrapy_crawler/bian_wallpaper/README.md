@@ -9,8 +9,8 @@
 
 *--MongoDB数据库*
 
-![MongoDB数据库](https://github.com/pipipp/python_spider/blob/master/trunk/python_scripts/spiders/scrapy_crawler/cralwer_projects/bian_wallpaper/images/bian_MongoDB.PNG)
+![MongoDB数据库](https://github.com/pipipp/Spiders/blob/master/scrapy_crawler/bian_wallpaper/images/bian_MongoDB.PNG)
 
 *--wallpapers*
 
-![wallpapers](https://github.com/pipipp/python_spider/blob/master/trunk/python_scripts/spiders/scrapy_crawler/cralwer_projects/bian_wallpaper/images/wallpaper.JPG)
+![wallpapers](https://github.com/pipipp/Spiders/blob/master/scrapy_crawler/bian_wallpaper/images/wallpaper.JPG)
