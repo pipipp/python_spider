@@ -5,10 +5,13 @@ Cesium website crawler
 import os
 import re
 import json
+import datetime
 import base64
 import requests
 import threading
+import tkinter as tk
 
+from tkinter import messagebox
 from urllib.parse import unquote
 
 __author__ = 'Evan'
@@ -264,32 +267,198 @@ class CCCSpider(object):
         print('All the measurement files have been downloaded')
 
 
-if __name__ == '__main__':
-    account = ('evaliu', '******')
-    pass_code = '396103'
-    request_data = {
-        'sernum': '',
-        'uuttype': '',
-        'area': '',
-        'machine': 'fxcavp996',
-        'location': '',
-        'test': '',
-        'passfail': 'F',  # 'passfail': 'P,F,A',
-        'start_time': '2020-03-15 00:00:00',
-        'end_time': '2020-03-16 00:00:00',
-        'dataset': 'test_results',
-        'database': None,  # debug database: 'dev'
-        'start': 0,
-        'limit': '5000',
-        'user': '',
-        'attribute': '',
-        'fttd': 0,
-        'lttd': 0,
-        'ftta': 0,
-        'passedsampling': 0,
-    }
-    download_file = ['sequence_log']  # ['sequence_log', 'UUT_buffer']
+class SpiderGui(object):
 
-    spider = CCCSpider(login_account=account)
-    spider.main(automatic_login=True,  first_request_data=request_data,
-                download_file_type=download_file, authentication_code=pass_code)
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title('CCC Spider Tool                        Author: ～Evan～')
+        self.root.geometry('580x220')
+        self.current_month = datetime.datetime.now().strftime('%Y-%m-%d')
+        self.test_status = None
+        self.log_status = None
+        self.debug_status = None
+
+        tk.Label(self.root, text='CEC Username').grid(row=0, column=0)
+        self.username = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.username).grid(row=1, column=0)
+
+        tk.Label(self.root, text='CEC Password').grid(row=0, column=1)
+        self.password = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.password, show='*').grid(row=1, column=1)
+
+        tk.Label(self.root, text='Mobile Pass Code').grid(row=0, column=2)
+        self.pass_code = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.pass_code).grid(row=1, column=2)
+
+        self.use_debug = tk.BooleanVar()
+        tk.Checkbutton(self.root, text="Use Debug DB", variable=self.use_debug, command=self.debug_button_event). \
+            grid(row=6, column=2)
+
+        tk.Label(self.root, text='Select Status').grid(row=2, column=2)
+        self.fail_status = tk.BooleanVar()
+        self.pass_status = tk.BooleanVar()
+        self.about_status = tk.BooleanVar()
+        tk.Checkbutton(self.root, text="F", variable=self.fail_status, command=self.status_button_event)\
+            .grid(row=3, column=2, sticky=tk.NSEW)
+        tk.Checkbutton(self.root, text="P", variable=self.pass_status, command=self.status_button_event). \
+            grid(row=4, column=2, sticky=tk.NSEW)
+        tk.Checkbutton(self.root, text="A", variable=self.about_status, command=self.status_button_event). \
+            grid(row=5, column=2, sticky=tk.NSEW)
+
+        tk.Label(self.root, text='Select Download Log').grid(row=2, column=3)
+        self.seq_log = tk.BooleanVar()
+        self.uut_buffer = tk.BooleanVar()
+        tk.Checkbutton(self.root, text="Sequence_log", variable=self.seq_log, command=self.log_button_event). \
+            grid(row=3, column=3, sticky=tk.W)
+        tk.Checkbutton(self.root, text="UUT_buffer", variable=self.uut_buffer, command=self.log_button_event). \
+            grid(row=4, column=3, sticky=tk.W)
+
+        self.label1 = tk.Label(self.root, text='Start Time').grid(row=2, column=0)
+        self.start_time = tk.StringVar()
+        self.entry1 = tk.Entry(self.root, textvariable=self.start_time)
+        self.start_time.set(self.current_month + ' 08:00:00')
+        self.entry1.grid(row=3, column=0, sticky=tk.W)
+
+        self.label2 = tk.Label(self.root, text='End Time').grid(row=2, column=1)
+        self.end_time = tk.StringVar()
+        self.entry2 = tk.Entry(self.root, textvariable=self.end_time)
+        self.end_time.set(self.current_month + ' 20:00:00')
+        self.entry2.grid(row=3, column=1, sticky=tk.W)
+
+        tk.Label(self.root, text='UUT Type').grid(row=4, column=0)
+        self.uut_type = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.uut_type).grid(row=5, column=0)
+
+        tk.Label(self.root, text='Serial Number').grid(row=4, column=1)
+        self.serial_number = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.serial_number).grid(row=5, column=1)
+
+        tk.Label(self.root, text='Area').grid(row=6, column=0)
+        self.area = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.area).grid(row=7, column=0)
+
+        tk.Label(self.root, text='Machine').grid(row=6, column=1)
+        self.machine = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.machine).grid(row=7, column=1)
+
+        tk.Button(self.root, text='Quit', command=self.root.quit, bg='GreenYellow').grid(row=7, column=2)
+        tk.Button(self.root, text='Execute', command=self.start_crawl, bg='DodgerBlue', width=10)\
+            .grid(row=7, column=3, sticky=tk.W)
+        self.set_gui_center()
+
+    def status_button_event(self):
+        test_status = ''
+        input_status = [self.fail_status.get(), self.pass_status.get(), self.about_status.get()]
+        status_type = ['F', 'P', 'A']
+        for status, types in zip(input_status, status_type):
+            if status:
+                test_status += types
+        self.test_status = ','.join(test_status)
+
+    def debug_button_event(self):
+        debug_status = False
+        if self.use_debug.get():
+            debug_status = True
+        self.debug_status = debug_status
+
+    def log_button_event(self):
+        log_status = []
+        input_status = [self.seq_log.get(), self.uut_buffer.get()]
+        status_type = ['sequence_log', 'UUT_buffer']
+        for status, types in zip(input_status, status_type):
+            if status:
+                log_status.append(types)
+        self.log_status = log_status
+
+    def set_gui_center(self):
+        self.root.update_idletasks()
+        x = (self.root.winfo_screenwidth() - self.root.winfo_reqwidth()) / 3
+        y = (self.root.winfo_screenwidth() - self.root.winfo_reqwidth()) / 4
+        self.root.geometry('+%d+%d' % (x, y))
+
+    def get_all_input_info(self):
+        result = {
+            'username': self.username.get(),
+            'password': self.password.get(),
+            'pass_code': self.pass_code.get(),
+            'start_time': self.start_time.get(),
+            'end_time': self.end_time.get(),
+            'uut_type': self.uut_type.get(),
+            'serial_number': self.serial_number.get(),
+            'area': self.area.get(),
+            'machine': self.machine.get(),
+            'select_status': self.test_status,
+            'select_download_log': self.log_status,
+            'use_debug': self.debug_status,
+        }
+        return result
+
+    def start_crawl(self):
+        all_input_info = self.get_all_input_info()
+        if not all_input_info['username']:
+            messagebox.showwarning('Warning', 'CEC username is null. Please enter again!')
+            return
+        if not all_input_info['password']:
+            messagebox.showwarning('Warning', 'CEC password is null. Please enter again!')
+            return
+        if not all_input_info['pass_code']:
+            messagebox.showwarning('Warning', 'Mobile pass code is null. Please enter again!')
+            return
+        if not all_input_info['select_download_log']:
+            messagebox.showwarning('Warning', 'Select download log is null. Please enter again!')
+            return
+        if not all_input_info['select_status']:
+            messagebox.showwarning('Warning', 'Select status is null. Please enter again!')
+            return
+        if not all_input_info['uut_type'] and not all_input_info['serial_number'] and \
+                not all_input_info['area'] and not all_input_info['machine']:
+            messagebox.showwarning('Warning', 'Search information cannot be empty. Please enter again!')
+            return
+
+        if all_input_info['use_debug']:
+            all_input_info['use_debug'] = 'dev'
+        else:
+            all_input_info['use_debug'] = None
+
+        request_data = {
+            'sernum': all_input_info['serial_number'],
+            'uuttype': all_input_info['uut_type'],
+            'area': all_input_info['area'],
+            'machine': all_input_info['machine'],
+            'location': '',
+            'test': '',
+            'passfail': all_input_info['select_status'],
+            'start_time': all_input_info['start_time'],
+            'end_time': all_input_info['end_time'],
+            'dataset': 'test_results',
+            'database': all_input_info['use_debug'],
+            'start': 0,
+            'limit': '5000',
+            'user': '',
+            'attribute': '',
+            'fttd': 0,
+            'lttd': 0,
+            'ftta': 0,
+            'passedsampling': 0,
+        }
+        print('-' * 40)
+        print('request_data:\n{}'.format(request_data))
+        print('Select download log:\n{}'.format(all_input_info['select_download_log']))
+        print('Mobile pass code:\n{}'.format(all_input_info['pass_code']))
+        print('-' * 40)
+
+        messagebox.showinfo('Info', 'Information read complete, start to crawl\nClick ok to continue...')
+        try:
+            spider = CCCSpider(login_account=(all_input_info['username'], all_input_info['password']))
+            spider.main(automatic_login=True, first_request_data=request_data,
+                        download_file_type=all_input_info['select_download_log'],
+                        authentication_code=all_input_info['pass_code'])
+        except Exception as es:
+            messagebox.showerror('Error', 'Crawl failure\nError msg: {}'.format(es))
+        else:
+            messagebox.showinfo('Info', 'Crawl successful, All the measurement files have been downloaded')
+
+
+if __name__ == '__main__':
+    spider_gui = SpiderGui()
+    spider_gui.root.mainloop()
