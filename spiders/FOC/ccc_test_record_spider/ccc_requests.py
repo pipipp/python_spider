@@ -1,11 +1,14 @@
 """
-爬取CCC网站 - Requests
+Cesium website crawler
 """
 # -*- coding:utf-8 -*-
-import requests
+import os
 import re
 import time
 import json
+import base64
+import requests
+import threading
 
 from urllib.parse import unquote
 
@@ -28,7 +31,7 @@ class CCCSpider(object):
 
     def login(self):
         resp = self.session.get(self.root_url)
-        if '302' in str(resp.history):  # 重定向进入账号登陆界面
+        if '302' in str(resp.history):  # Redirect to the account login screen
             login_url = re.search('name="login-form" action="(.+?)"', resp.text)
             data = {
                 'pf.username': self.login_account[0],
@@ -38,7 +41,7 @@ class CCCSpider(object):
             }
             resp = self.session.post(login_url.group(1), data=data)
             if resp.status_code == 200:
-                # 登陆账号后进入认证界面 "Two-Factor Authentication"
+                # Enter the authentication interface "Two-Factor Authentication"
                 sig_request = re.search("'sig_request': '(.+?)(:APP.+?)'", resp.text)
                 post_action = re.search("'post_action': '(.+?)'", resp.text)
                 referer = 'https://cloudsso.cisco.com/' + post_action.group(1)
@@ -55,15 +58,15 @@ class CCCSpider(object):
                     'is_cef_browser': 'false',
                     'is_ipad_os': 'false'
                 }
-                # 申请认证请求 --> https://api-dbbfec7f.duosecurity.com/frame/web/v1/auth?
+                # Request for certification --> https://api-dbbfec7f.duosecurity.com/frame/web/v1/auth?
                 resp = self.session.post(authentication_url, data=data)
-                if '302' in str(resp.history):  # 重定向进入手机验证界面
+                if '302' in str(resp.history):  # Redirect into the mobile phone verification interface
                     sid = re.search('sid=(.+)', unquote(resp.url))
                     # data = {
                     #     'sid': sid.group(1),
                     #     'device': 'phone1',
                     #     'factor: ': 'Passcode',
-                    #     'passcode: ': '317138',  # 使用手机验证码登陆
+                    #     'passcode: ': '317138',  # login using mobile verification code
                     #     'dampen_choice': 'true',
                     #     'out_of_date': 'False',
                     #     'days_out_of_date': '0',
@@ -73,29 +76,29 @@ class CCCSpider(object):
                         'sid': sid.group(1),
                         'device': 'phone1',
                         'factor': 'Duo Push',
-                        'dampen_choice': 'true',  # 使用手机push登陆
+                        'dampen_choice': 'true',  # Use push to login
                         'out_of_date': 'False',
                         'days_out_of_date': '0',
                         'days_to_block': 'None'
                     }
-                    # 开始验证
+                    # Start validation
                     resp = self.session.post(self.verification_prompt_url, data=data)
                     if resp.status_code == 200:
-                        # TODO 使用手机进入验证软件进行确认
-                        input('Please use your mobile phone to verify the login request [Press enter to continue]: ')
+                        input('Please use your mobile phone to verify the login request'
+                              ' [Press enter to continue after verification]: ')
                         time.sleep(1)
                         data = {
                             'sid': sid.group(1),
                             'txid': resp.json()['response']['txid']
                         }
-                        # 获取验证结果
+                        # Get validation results
                         resp = self.session.post(self.verification_status_url, data=data)
                         if resp.status_code == 200:
                             status_result_url = self.verification_source_url + resp.json()['response']['result_url']
                             data = {
                                 'sid': sid.group(1)
                             }
-                            # 获取验证结果的cookie
+                            # Gets the cookie for the validation result
                             resp = self.session.post(status_result_url, data=data)
                             if resp.status_code == 200:
                                 authentication_url = resp.json()['response']['parent']
@@ -103,86 +106,184 @@ class CCCSpider(object):
                                 data = {
                                     'sig_response': sig_response + sig_request.group(2)
                                 }
-                                # 获取cookie后重新进入认证界面
+                                # Retrieve the cookie and re-enter the authentication interface
                                 self.session.post(authentication_url, data=data)
-                                # 携带认证后的cookie获取Token
+                                # Carry the authenticated cookie acquisition Token
                                 token_url = 'https://cesium.cisco.com/apps/machineservices/MachineDetails.svc/getToken'
                                 resp = self.session.get(token_url)
                                 token = resp.json()['session']
-                                # 在session中添加Token
-                                self.session.headers.update({'csession': token})
-                                print('Login CCC website successfully')
+                                # Add Token in session
+                                self.session.headers.update({
+                                    'csession': token,
+                                    '_csession': token
+                                })
 
-    def set_ccc_cookie(self, cookie, csession):
+    def set_ccc_cookie(self, cookie, session):
         """
-        设置访问CCC网站的请求头 [ cookie & 认证令牌 ]
-        :param cookie: 会话cookie
-        :param csession: 认证令牌
+        Add cookie and token to spider
+        :param cookie: Request cookie
+        :param session: Request token
         :return:
         """
         self.session.headers.update({
             'cookie': cookie,
-            'csession': csession,
+            'csession': session,
+            '_csession': session
         })
 
-    def login_ccc(self, whether_manually_get_cookie=False):
+    def login_ccc(self, automatic_login=True):
         """
-        登陆CCC网站
-        :param bool whether_manually_get_cookie: 选择是否手动添加Cookie或者自动获取Cookie，默认为自动获取
+        Login http://cesium.cisco.com
+        :param bool automatic_login: If the value is False, you need to manually add cookie and cession
         :return:
         """
-        if whether_manually_get_cookie:
-            cookie = input('Cookie: ')
-            csession = input('Csession: ')
-            if not cookie or not csession:
-                raise ValueError('Cookie或Csession填写有误，请重新填写')
-            self.set_ccc_cookie(cookie=cookie, csession=csession)
-        else:
+        if automatic_login:
             self.login()
+        else:
+            print('You need to login the CCC website and manually copy the cookie'
+                  ' and csession values to start the crawler')
+            cookie = input('Cookie: ')
+            session = input('Session: ')
+            if not cookie or not session:
+                raise ValueError('Cookie and cession are filled in incorrectly, please fill in again')
+            self.set_ccc_cookie(cookie=cookie, session=session)
+        print('Login CCC website successfully')
 
-    def test_record_search(self):
+    def get_all_test_data(self, data={}):
+        """
+        Get historical test data on the CCC website
+        :param data: Fill in the request data for spider
+        :return:
+        """
         multi_search_url = 'https://cesium.cisco.com/polarissvcs/central_data/multi_search'
-        data = {
-            'sernum': '',
-            'uuttype': '',
-            'area': '',
-            'machine': 'fxcavp996',
-            'location': '',
-            'test': '',
-            'passfail': 'P,F,A',
-            'start_time': '2020-03-15 00:00:00',
-            'end_time': '2020-03-16 00:00:00',
-            'dataset': 'test_results',
-            'database': None,
-            'start': 0,
-            'limit': '5000',
-            'user': '',
-            'attribute': '',
-            'fttd': 0,
-            'lttd': 0,
-            'ftta': 0,
-            'passedsampling': 0,
-        }
         resp = self.session.post(multi_search_url, data=json.dumps(data))
         if resp.status_code == 200:
-            print('Search result:')
-            print(resp.json())
+            return resp.json()
+        else:
+            return None
 
-    def main(self, whether_manually_get_cookie=False):
+    def get_measurement_data(self, serial_number='', specified_file_type=['sequence_log'], request_params={}):
         """
-        访问CCC网站获取资源
-        :param bool whether_manually_get_cookie: 选择是否手动添加Cookie或者自动获取Cookie
+        Gets the specified measurement file for the specified serial number
+        :param str serial_number: Test serial number
+        :param list specified_file_type: Fill in the type of measurement document,example:['sequence_log','UUT_buffer']
+        :param dict request_params: Fill in the request params for spider
+        :return: (measurement type, measurement id)
+        """
+        measures_url = 'https://cesium.cisco.com/svclnx/cgi-bin/central_cs/services.py/meas/{}'.format(serial_number)
+        resp = self.session.get(measures_url, params=request_params)
+        if resp.status_code == 200:
+            measures_data = resp.json()
+            for each_data in measures_data['measurements']:  # Walk through each measurement file
+                for file_type in specified_file_type:
+                    if file_type in each_data['limit_id']:  # Matches the specified file type
+                        yield (file_type, each_data['measurement'])  # return the measurement type and id for download
+            else:
+                yield None
+
+    def download_measurement_log(self, file_name='measurement.log', binary_id=''):
+        """
+        Download the measurement log to local
+        :param file_name: Log file name
+        :param binary_id: Measurement log id
         :return:
         """
-        self.login_ccc(whether_manually_get_cookie)
-        self.test_record_search()
+        download_url = 'https://cesium.cisco.com/svclnx/cgi-bin/central_cs/services.py/binarymeas_data/run'
+        data = {
+            'binary_id': binary_id,
+            'source': 'Apollo'
+        }
+        resp = self.session.post(download_url, data=json.dumps(data))
+        if resp.status_code == 200:
+            content = base64.b64decode(resp.text)  # Base64 decode
+            with open(file_name, 'wb') as wf:
+                wf.write(content)  # Write measurement log
+
+    def get_measurement_log_file(self, index, measurement_data, specified_file_type=[]):
+        """
+        Get measurement log file
+        :param int index: measurement data index
+        :param dict measurement_data: measurement data
+        :param list specified_file_type: The specified file type to download
+        :return:
+        """
+        serial_number = measurement_data['sernum']
+        params = {
+            'area': measurement_data['area'],
+            'server': 'prod',
+            'timeid': measurement_data['tst_id'],
+            'uuttype': measurement_data['uuttype']
+        }
+        for measures in self.get_measurement_data(serial_number=serial_number,
+                                                  specified_file_type=specified_file_type,
+                                                  request_params=params):
+            if measures:
+                test_time = measurement_data['rectime'].replace(' ', '_').replace(':', '-')
+                fail_info = measurement_data['attributes']['TEST']
+                # Log name = 'ApolloServer - SN - TestTime - FailInfo - MeasuresType.log'
+                log_name = '{}_{}_{}_{}_{}.log'.format(measurement_data['machine'], serial_number,
+                                                       test_time, fail_info, measures[0])
+                self.download_measurement_log(file_name=log_name, binary_id=measures[1])
+                print('Index: {} --> Writing to file << {} >> succeeded'.format(index + 1, log_name))
+
+    def main(self, automatic_login=True, first_request_data={}, download_file_type=[]):
+        """
+        Login CCC website to crawl test data
+        :param bool automatic_login: Automatic login requires mobile phone approve,
+        If the value is False, you need to manually add cookie and cession for spider
+        :param dict first_request_data: Fill in the first request data for spider
+        :param list download_file_type: Fill in the specified file type to download
+        :return:
+        """
+        self.login_ccc(automatic_login)
+        all_data = self.get_all_test_data(data=first_request_data)
+        if not all_data or not all_data['results']:
+            raise ValueError('No data was found, Please confirm the requested data')
+        print('Crawling all test data is completed, Total: {}'.format(len(all_data['results'])))
+
+        # Create a folder to store all the measurement files
+        if not os.path.isdir('measurement_download_result'):
+            os.mkdir('measurement_download_result')
+        os.chdir('measurement_download_result')
+
+        threads = []
+        print('Start multi-threading to download the measurement file')
+        for index, each_data in enumerate(all_data['results']):
+            t = threading.Thread(target=self.get_measurement_log_file, args=(index, each_data, download_file_type))
+            threads.append(t)
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+        print('All the measurement files have been downloaded')
 
 
 if __name__ == '__main__':
-    username = input('CEC Username: ')
-    password = input('CEC Password: ')
-    if username and password:
-        spider = CCCSpider(login_account=(username, password))
-        spider.main(whether_manually_get_cookie=False)
-    else:
-        raise ValueError('用户名或密码填写有误，请重新填写')
+    account = ('evaliu', '******')
+    request_data = {
+        'sernum': '',
+        'uuttype': '',
+        'area': '',
+        'machine': 'fxcavp996',
+        'location': '',
+        'test': '',
+        'passfail': 'F',  # 'passfail': 'P,F,A',
+        'start_time': '2019-09-15 00:00:00',
+        'end_time': '2019-09-16 00:00:00',
+        'dataset': 'test_results',
+        'database': None,  # debug database: 'dev'
+        'start': 0,
+        'limit': '5000',
+        'user': '',
+        'attribute': '',
+        'fttd': 0,
+        'lttd': 0,
+        'ftta': 0,
+        'passedsampling': 0,
+    }
+    download_file = ['sequence_log']  # ['sequence_log', 'UUT_buffer']
+
+    spider = CCCSpider(login_account=account)
+    spider.main(automatic_login=True,  first_request_data=request_data, download_file_type=download_file)
