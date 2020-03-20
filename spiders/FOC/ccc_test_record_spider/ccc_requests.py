@@ -29,7 +29,12 @@ class CCCSpider(object):
                           ' Chrome/80.0.3987.132 Safari/537.36'
         })
 
-    def login(self):
+    def login(self, authentication_code=''):
+        """
+        Login CCC website
+        :param authentication_code: Fill in the Mobile pass code
+        :return:
+        """
         resp = self.session.get(self.root_url)
         if '302' in str(resp.history):  # Redirect to the account login screen
             login_url = re.search('name="login-form" action="(.+?)"', resp.text)
@@ -62,31 +67,29 @@ class CCCSpider(object):
                 resp = self.session.post(authentication_url, data=data)
                 if '302' in str(resp.history):  # Redirect into the mobile phone verification interface
                     sid = re.search('sid=(.+)', unquote(resp.url))
+                    data = {
+                        'sid': sid.group(1),
+                        'device': 'phone1',
+                        'factor': 'Passcode',  # Use mobile pass code login
+                        'passcode': authentication_code,
+                        'out_of_date': 'False',
+                        'days_out_of_date': '0',
+                        'days_to_block': 'None'
+                    }
                     # data = {
                     #     'sid': sid.group(1),
                     #     'device': 'phone1',
-                    #     'factor: ': 'Passcode',
-                    #     'passcode: ': '317138',  # login using mobile verification code
+                    #     'factor': 'Duo Push',  # Use mobile push login
                     #     'dampen_choice': 'true',
                     #     'out_of_date': 'False',
                     #     'days_out_of_date': '0',
                     #     'days_to_block': 'None'
                     # }
-                    data = {
-                        'sid': sid.group(1),
-                        'device': 'phone1',
-                        'factor': 'Duo Push',
-                        'dampen_choice': 'true',  # Use push to login
-                        'out_of_date': 'False',
-                        'days_out_of_date': '0',
-                        'days_to_block': 'None'
-                    }
                     # Start validation
                     resp = self.session.post(self.verification_prompt_url, data=data)
                     if resp.status_code == 200:
-                        input('Please use your mobile phone to verify the login request'
-                              ' [Press enter to continue after verification]: ')
-                        time.sleep(1)
+                        # input('Please use your mobile phone to verify the login request'
+                        #       ' [Press enter to continue after verification]: ')
                         data = {
                             'sid': sid.group(1),
                             'txid': resp.json()['response']['txid']
@@ -131,14 +134,15 @@ class CCCSpider(object):
             '_csession': session
         })
 
-    def login_ccc(self, automatic_login=True):
+    def login_ccc(self, automatic_login=True, authentication_code=''):
         """
         Login http://cesium.cisco.com
         :param bool automatic_login: If the value is False, you need to manually add cookie and cession
+        :param str authentication_code: Fill in the Mobile pass code
         :return:
         """
         if automatic_login:
-            self.login()
+            self.login(authentication_code=authentication_code)
         else:
             print('You need to login the CCC website and manually copy the cookie'
                   ' and csession values to start the crawler')
@@ -226,16 +230,17 @@ class CCCSpider(object):
                 self.download_measurement_log(file_name=log_name, binary_id=measures[1])
                 print('Index: {} --> Writing to file << {} >> succeeded'.format(index + 1, log_name))
 
-    def main(self, automatic_login=True, first_request_data={}, download_file_type=[]):
+    def main(self, automatic_login=True, first_request_data={}, download_file_type=[], authentication_code=''):
         """
         Login CCC website to crawl test data
         :param bool automatic_login: Automatic login requires mobile phone approve,
         If the value is False, you need to manually add cookie and cession for spider
         :param dict first_request_data: Fill in the first request data for spider
         :param list download_file_type: Fill in the specified file type to download
+        :param str authentication_code: Fill in the Mobile pass code
         :return:
         """
-        self.login_ccc(automatic_login)
+        self.login_ccc(automatic_login, authentication_code)
         all_data = self.get_all_test_data(data=first_request_data)
         if not all_data or not all_data['results']:
             raise ValueError('No data was found, Please confirm the requested data')
@@ -262,6 +267,7 @@ class CCCSpider(object):
 
 if __name__ == '__main__':
     account = ('evaliu', '******')
+    pass_code = '396103'
     request_data = {
         'sernum': '',
         'uuttype': '',
@@ -270,8 +276,8 @@ if __name__ == '__main__':
         'location': '',
         'test': '',
         'passfail': 'F',  # 'passfail': 'P,F,A',
-        'start_time': '2019-09-15 00:00:00',
-        'end_time': '2019-09-16 00:00:00',
+        'start_time': '2020-03-15 00:00:00',
+        'end_time': '2020-03-16 00:00:00',
         'dataset': 'test_results',
         'database': None,  # debug database: 'dev'
         'start': 0,
@@ -286,4 +292,5 @@ if __name__ == '__main__':
     download_file = ['sequence_log']  # ['sequence_log', 'UUT_buffer']
 
     spider = CCCSpider(login_account=account)
-    spider.main(automatic_login=True,  first_request_data=request_data, download_file_type=download_file)
+    spider.main(automatic_login=True,  first_request_data=request_data,
+                download_file_type=download_file, authentication_code=pass_code)
