@@ -4,7 +4,6 @@ Cesium website crawler
 # -*- coding:utf-8 -*-
 import os
 import re
-import time
 import json
 import base64
 import requests

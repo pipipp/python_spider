@@ -4,12 +4,14 @@ Cesium website crawler
 # -*- coding:utf-8 -*-
 import os
 import re
-import time
 import json
+import datetime
 import base64
 import requests
 import threading
+import tkinter as tk
 
+from tkinter import messagebox
 from urllib.parse import unquote
 
 __author__ = 'Evan'
@@ -29,7 +31,12 @@ class CCCSpider(object):
                           ' Chrome/80.0.3987.132 Safari/537.36'
         })
 
-    def login(self):
+    def login(self, authentication_code=''):
+        """
+        Login CCC website
+        :param authentication_code: Fill in the Mobile pass code
+        :return:
+        """
         resp = self.session.get(self.root_url)
         if '302' in str(resp.history):  # Redirect to the account login screen
             login_url = re.search('name="login-form" action="(.+?)"', resp.text)
@@ -62,31 +69,29 @@ class CCCSpider(object):
                 resp = self.session.post(authentication_url, data=data)
                 if '302' in str(resp.history):  # Redirect into the mobile phone verification interface
                     sid = re.search('sid=(.+)', unquote(resp.url))
+                    data = {
+                        'sid': sid.group(1),
+                        'device': 'phone1',
+                        'factor': 'Passcode',  # Use mobile pass code login
+                        'passcode': authentication_code,
+                        'out_of_date': 'False',
+                        'days_out_of_date': '0',
+                        'days_to_block': 'None'
+                    }
                     # data = {
                     #     'sid': sid.group(1),
                     #     'device': 'phone1',
-                    #     'factor: ': 'Passcode',
-                    #     'passcode: ': '317138',  # login using mobile verification code
+                    #     'factor': 'Duo Push',  # Use mobile push login
                     #     'dampen_choice': 'true',
                     #     'out_of_date': 'False',
                     #     'days_out_of_date': '0',
                     #     'days_to_block': 'None'
                     # }
-                    data = {
-                        'sid': sid.group(1),
-                        'device': 'phone1',
-                        'factor': 'Duo Push',
-                        'dampen_choice': 'true',  # Use push to login
-                        'out_of_date': 'False',
-                        'days_out_of_date': '0',
-                        'days_to_block': 'None'
-                    }
                     # Start validation
                     resp = self.session.post(self.verification_prompt_url, data=data)
                     if resp.status_code == 200:
-                        input('Please use your mobile phone to verify the login request'
-                              ' [Press enter to continue after verification]: ')
-                        time.sleep(1)
+                        # input('Please use your mobile phone to verify the login request'
+                        #       ' [Press enter to continue after verification]: ')
                         data = {
                             'sid': sid.group(1),
                             'txid': resp.json()['response']['txid']
@@ -131,14 +136,15 @@ class CCCSpider(object):
             '_csession': session
         })
 
-    def login_ccc(self, automatic_login=True):
+    def login_ccc(self, automatic_login=True, authentication_code=''):
         """
         Login http://cesium.cisco.com
         :param bool automatic_login: If the value is False, you need to manually add cookie and cession
+        :param str authentication_code: Fill in the Mobile pass code
         :return:
         """
         if automatic_login:
-            self.login()
+            self.login(authentication_code=authentication_code)
         else:
             print('You need to login the CCC website and manually copy the cookie'
                   ' and csession values to start the crawler')
@@ -226,16 +232,17 @@ class CCCSpider(object):
                 self.download_measurement_log(file_name=log_name, binary_id=measures[1])
                 print('Index: {} --> Writing to file << {} >> succeeded'.format(index + 1, log_name))
 
-    def main(self, automatic_login=True, first_request_data={}, download_file_type=[]):
+    def main(self, automatic_login=True, first_request_data={}, download_file_type=[], authentication_code=''):
         """
         Login CCC website to crawl test data
         :param bool automatic_login: Automatic login requires mobile phone approve,
         If the value is False, you need to manually add cookie and cession for spider
         :param dict first_request_data: Fill in the first request data for spider
         :param list download_file_type: Fill in the specified file type to download
+        :param str authentication_code: Fill in the Mobile pass code
         :return:
         """
-        self.login_ccc(automatic_login)
+        self.login_ccc(automatic_login, authentication_code)
         all_data = self.get_all_test_data(data=first_request_data)
         if not all_data or not all_data['results']:
             raise ValueError('No data was found, Please confirm the requested data')
@@ -260,30 +267,113 @@ class CCCSpider(object):
         print('All the measurement files have been downloaded')
 
 
-if __name__ == '__main__':
-    account = ('evaliu', '******')
-    request_data = {
-        'sernum': '',
-        'uuttype': '',
-        'area': '',
-        'machine': 'fxcavp996',
-        'location': '',
-        'test': '',
-        'passfail': 'F',  # 'passfail': 'P,F,A',
-        'start_time': '2020-03-15 00:00:00',
-        'end_time': '2020-03-16 00:00:00',
-        'dataset': 'test_results',
-        'database': None,  # debug database: 'dev'
-        'start': 0,
-        'limit': '5000',
-        'user': '',
-        'attribute': '',
-        'fttd': 0,
-        'lttd': 0,
-        'ftta': 0,
-        'passedsampling': 0,
-    }
-    download_file = ['sequence_log']  # ['sequence_log', 'UUT_buffer']
+class SpiderGui(object):
 
-    spider = CCCSpider(login_account=account)
-    spider.main(automatic_login=True,  first_request_data=request_data, download_file_type=download_file)
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title('CCC Spider Tool        Author: ～Evan～')
+        self.root.geometry('600x500')
+        self.current_month = datetime.datetime.now().strftime('%Y-%m-%d')
+
+        tk.Label(self.root, text='CEC Username').grid(row=0, column=0)
+        self.username = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.username).grid(row=1, column=0)
+
+        tk.Label(self.root, text='CEC Password').grid(row=0, column=1)
+        self.password = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.password).grid(row=1, column=1)
+
+        self.use_debug = tk.BooleanVar()
+        tk.Checkbutton(self.root, text="Use Debug DB", variable=self.use_debug, command=self.check_butten_event). \
+            grid(row=0, column=2)
+
+        tk.Label(self.root, text='Test Status').grid(row=1, column=2)
+        self.fail_status = tk.BooleanVar()
+        self.pass_status = tk.BooleanVar()
+        self.about_status = tk.BooleanVar()
+        tk.Checkbutton(self.root, text="F", variable=self.fail_status, command=self.check_butten_event). \
+            grid(row=2, column=2)
+        tk.Checkbutton(self.root, text="P", variable=self.pass_status, command=self.check_butten_event). \
+            grid(row=3, column=2)
+        tk.Checkbutton(self.root, text="A", variable=self.about_status, command=self.check_butten_event). \
+            grid(row=4, column=2)
+
+        self.label1 = tk.Label(self.root, text='Start Time').grid(row=2, column=0)
+        self.start_time = tk.StringVar()
+        self.entry1 = tk.Entry(self.root, textvariable=self.start_time)
+        self.start_time.set(self.current_month + ' 08:00:00')
+        self.entry1.grid(row=3, column=0, sticky=tk.W)
+
+        self.label2 = tk.Label(self.root, text='End Time').grid(row=2, column=1)
+        self.end_time = tk.StringVar()
+        self.entry2 = tk.Entry(self.root, textvariable=self.end_time)
+        self.end_time.set(self.current_month + ' 20:00:00')
+        self.entry2.grid(row=3, column=1, sticky=tk.W)
+
+        tk.Label(self.root, text='Serial Number').grid(row=4, column=0)
+        self.serial_number = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.password).grid(row=5, column=0)
+
+        tk.Label(self.root, text='UUT Type').grid(row=4, column=1)
+        self.uut_type = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.password).grid(row=5, column=1)
+
+        tk.Label(self.root, text='Area').grid(row=6, column=0)
+        self.area = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.password).grid(row=7, column=0)
+
+        tk.Label(self.root, text='Machine').grid(row=6, column=1)
+        self.machine = tk.StringVar()
+        tk.Entry(self.root, textvariable=self.password).grid(row=7, column=1)
+
+        tk.Button(self.root, text='Quit', command=self.quit_gui, bg='GreenYellow', width=7, height=2).grid(row=5, column=2)
+        tk.Button(self.root, text='Execute', command=self.start_crawl, bg='DodgerBlue', width=7, height=2).grid(row=7, column=2)
+
+        # self.set_gui_center()
+
+    def check_butten_event(self):
+        pass
+
+    def set_gui_center(self):
+        self.root.update_idletasks()
+        x = (self.root.winfo_screenwidth() - self.root.winfo_reqwidth()) / 2
+        y = (self.root.winfo_screenwidth() - self.root.winfo_reqwidth()) / 2
+        self.root.geometry('+%d+%d' % (x, y))
+
+    def quit_gui(self):
+        self.root.quit()
+
+    def start_crawl(self):
+        account = ('evaliu', '55Dashun!')
+        pass_code = ''
+        request_data = {
+            'sernum': '',
+            'uuttype': '',
+            'area': '',
+            'machine': 'fxcavp996',
+            'location': '',
+            'test': '',
+            'passfail': 'F',  # 'passfail': 'P,F,A',
+            'start_time': '2020-03-15 00:00:00',
+            'end_time': '2020-03-16 00:00:00',
+            'dataset': 'test_results',
+            'database': None,  # debug database: 'dev'
+            'start': 0,
+            'limit': '5000',
+            'user': '',
+            'attribute': '',
+            'fttd': 0,
+            'lttd': 0,
+            'ftta': 0,
+            'passedsampling': 0,
+        }
+        download_file = ['sequence_log']  # ['sequence_log', 'UUT_buffer']
+
+        spider = CCCSpider(login_account=account)
+        spider.main(automatic_login=True, first_request_data=request_data,
+                    download_file_type=download_file, authentication_code=pass_code)
+
+
+if __name__ == '__main__':
+    spider_gui = SpiderGui()
+    spider_gui.root.mainloop()
