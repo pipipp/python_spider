@@ -271,7 +271,7 @@ class SpiderGui(object):
 
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title('CCC Spider Tool                        Author: ～Evan～')
+        self.root.title('CCC Crawler Tool                        Author: ～Evan～')
         self.root.geometry('580x220')
         self.current_month = datetime.datetime.now().strftime('%Y-%m-%d')
         self.test_status = None
@@ -292,18 +292,18 @@ class SpiderGui(object):
 
         self.use_debug = tk.BooleanVar()
         tk.Checkbutton(self.root, text="Use Debug DB", variable=self.use_debug, command=self.debug_button_event). \
-            grid(row=6, column=2)
+            grid(row=6, column=2, sticky=tk.W)
 
-        tk.Label(self.root, text='Select Status').grid(row=2, column=2)
+        tk.Label(self.root, text='Select Status').grid(row=2, column=2, sticky=tk.W, padx=30)
         self.fail_status = tk.BooleanVar()
         self.pass_status = tk.BooleanVar()
         self.about_status = tk.BooleanVar()
-        tk.Checkbutton(self.root, text="F", variable=self.fail_status, command=self.status_button_event)\
-            .grid(row=3, column=2, sticky=tk.NSEW)
-        tk.Checkbutton(self.root, text="P", variable=self.pass_status, command=self.status_button_event). \
-            grid(row=4, column=2, sticky=tk.NSEW)
-        tk.Checkbutton(self.root, text="A", variable=self.about_status, command=self.status_button_event). \
-            grid(row=5, column=2, sticky=tk.NSEW)
+        tk.Checkbutton(self.root, text="Failed", variable=self.fail_status, command=self.status_button_event)\
+            .grid(row=3, column=2, sticky=tk.W, padx=30)
+        tk.Checkbutton(self.root, text="Passed", variable=self.pass_status, command=self.status_button_event). \
+            grid(row=4, column=2, sticky=tk.W, padx=30)
+        tk.Checkbutton(self.root, text="Aborted", variable=self.about_status, command=self.status_button_event). \
+            grid(row=5, column=2, sticky=tk.W, padx=30)
 
         tk.Label(self.root, text='Select Download Log').grid(row=2, column=3)
         self.seq_log = tk.BooleanVar()
