@@ -400,18 +400,34 @@ class SpiderGui(object):
         if not all_input_info['username']:
             messagebox.showwarning('Warning', 'CEC username is null. Please enter again!')
             return
+
         if not all_input_info['password']:
             messagebox.showwarning('Warning', 'CEC password is null. Please enter again!')
             return
+
         if not all_input_info['pass_code']:
             messagebox.showwarning('Warning', 'Mobile pass code is null. Please enter again!')
             return
+        
+        if all_input_info['start_time'] and all_input_info['end_time']:
+            time_format = re.compile(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$')
+            for i in [all_input_info['start_time'], all_input_info['end_time']]:
+                result = re.match(time_format, i)
+                if not result:
+                    messagebox.showwarning('Warning', 'Wrong start time or end time format. Please enter again!')
+                    return
+        else:
+            messagebox.showwarning('Warning', 'Start time or end time is null. Please enter again!')
+            return
+
         if not all_input_info['select_download_log']:
             messagebox.showwarning('Warning', 'Select download log is null. Please enter again!')
             return
+
         if not all_input_info['select_status']:
             messagebox.showwarning('Warning', 'Select status is null. Please enter again!')
             return
+
         if not all_input_info['uut_type'] and not all_input_info['serial_number'] and \
                 not all_input_info['area'] and not all_input_info['machine']:
             messagebox.showwarning('Warning', 'Search information cannot be empty. Please enter again!')
