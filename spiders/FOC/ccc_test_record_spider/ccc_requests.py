@@ -144,7 +144,10 @@ class CCCSpider(object):
         :return:
         """
         if automatic_login:
-            self.login(authentication_code=authentication_code)
+            try:
+                self.login(authentication_code=authentication_code)
+            except Exception:
+                raise ValueError('The mobile pass code expires, Please fill in again!')
         else:
             print('You need to login the CCC website and manually copy the cookie'
                   ' and csession values to start the crawler')
@@ -225,10 +228,10 @@ class CCCSpider(object):
                                                   request_params=params):
             if measures:
                 test_time = measurement_data['rectime'].replace(' ', '_').replace(':', '-')
-                fail_info = measurement_data['attributes']['TEST']
-                # Log name = 'ApolloServer - SN - TestTime - FailInfo - MeasuresType.log'
+                test_status = measurement_data['attributes'].get('TEST') or 'PASS'
+                # Log name = 'ApolloServer - SN - TestTime - TestStatus - MeasuresType.log'
                 log_name = '{}_{}_{}_{}_{}.log'.format(measurement_data['machine'], serial_number,
-                                                       test_time, fail_info, measures[0])
+                                                       test_time, test_status, measures[0])
                 self.download_measurement_log(file_name=log_name, binary_id=measures[1])
                 print('Index: {} --> Writing to file << {} >> succeeded'.format(index + 1, log_name))
 
@@ -247,11 +250,6 @@ class CCCSpider(object):
         if not all_data or not all_data['results']:
             raise ValueError('No data was found, Please confirm the requested data')
         print('Crawling all test data is completed, Total: {}'.format(len(all_data['results'])))
-
-        # Create a folder to store all the measurement files
-        if not os.path.isdir('measurement_download_result'):
-            os.mkdir('measurement_download_result')
-        os.chdir('measurement_download_result')
 
         threads = []
         print('Start multi-threading to download the measurement file')
@@ -277,6 +275,10 @@ class SpiderGui(object):
         self.test_status = None
         self.log_status = None
         self.debug_status = None
+        # Create a folder to store all the measurement files
+        if not os.path.isdir('measurement_download_result'):
+            os.mkdir('measurement_download_result')
+        os.chdir('measurement_download_result')
 
         tk.Label(self.root, text='CEC Username').grid(row=0, column=0)
         self.username = tk.StringVar()
