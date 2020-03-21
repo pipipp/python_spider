@@ -19,8 +19,10 @@ __author__ = 'Evan'
 
 class CCCSpider(object):
 
-    def __init__(self, login_account):
+    def __init__(self, login_account, thread_pool_max=5):
         self.login_account = login_account
+        self.thread_pool = None
+        self.thread_pool_max = thread_pool_max
         self.root_url = 'https://cesium.cisco.com/apps/cesiumhome/overview'
         self.verification_source_url = 'https://api-dbbfec7f.duosecurity.com'
         self.verification_prompt_url = self.verification_source_url + '/frame/prompt'
@@ -216,24 +218,25 @@ class CCCSpider(object):
         :param list specified_file_type: The specified file type to download
         :return:
         """
-        serial_number = measurement_data['sernum']
-        params = {
-            'area': measurement_data['area'],
-            'server': 'prod',
-            'timeid': measurement_data['tst_id'],
-            'uuttype': measurement_data['uuttype']
-        }
-        for measures in self.get_measurement_data(serial_number=serial_number,
-                                                  specified_file_type=specified_file_type,
-                                                  request_params=params):
-            if measures:
-                test_time = measurement_data['rectime'].replace(' ', '_').replace(':', '-')
-                test_status = measurement_data['attributes'].get('TEST') or 'PASS'
-                # Log name = 'ApolloServer - SN - TestTime - TestStatus - MeasuresType.log'
-                log_name = '{}_{}_{}_{}_{}.log'.format(measurement_data['machine'], serial_number,
-                                                       test_time, test_status, measures[0])
-                self.download_measurement_log(file_name=log_name, binary_id=measures[1])
-                print('Index: {} --> Writing to file << {} >> succeeded'.format(index + 1, log_name))
+        with self.thread_pool:  # Controls the number of thread pools
+            serial_number = measurement_data['sernum']
+            params = {
+                'area': measurement_data['area'],
+                'server': 'prod',
+                'timeid': measurement_data['tst_id'],
+                'uuttype': measurement_data['uuttype']
+            }
+            for measures in self.get_measurement_data(serial_number=serial_number,
+                                                      specified_file_type=specified_file_type,
+                                                      request_params=params):
+                if measures:
+                    test_time = measurement_data['rectime'].replace(' ', '_').replace(':', '-')
+                    test_status = measurement_data['attributes'].get('TEST') or 'PASS'
+                    # Log name = 'ApolloServer - SN - TestTime - TestStatus - MeasuresType.log'
+                    log_name = '{}_{}_{}_{}_{}.log'.format(measurement_data['machine'], serial_number,
+                                                           test_time, test_status, measures[0])
+                    self.download_measurement_log(file_name=log_name, binary_id=measures[1])
+                    print('Index: {} --> Writing to file << {} >> succeeded'.format(index + 1, log_name))
 
     def main(self, automatic_login=True, first_request_data={}, download_file_type=[], authentication_code=''):
         """
@@ -252,6 +255,7 @@ class CCCSpider(object):
         print('Crawling all test data is completed, Total: {}'.format(len(all_data['results'])))
 
         threads = []
+        self.thread_pool = threading.Semaphore(value=self.thread_pool_max)  # Set thread pool
         print('Start multi-threading to download the measurement file')
         for index, each_data in enumerate(all_data['results']):
             t = threading.Thread(target=self.get_measurement_log_file, args=(index, each_data, download_file_type))
@@ -485,7 +489,8 @@ class SpiderGui(object):
 
         messagebox.showinfo('Info', 'Information read complete, start to crawl\nClick ok to continue...')
         try:
-            spider = CCCSpider(login_account=(all_input_info['username'], all_input_info['password']))
+            spider = CCCSpider(login_account=(all_input_info['username'], all_input_info['password']),
+                               thread_pool_max=10)
             spider.main(automatic_login=True, first_request_data=request_data,
                         download_file_type=all_input_info['select_download_log'],
                         authentication_code=all_input_info['pass_code'])
