@@ -313,7 +313,7 @@ class Spider(object):
 class Magic_gui(object):
 
     def __init__(self, url=''):
-        self.line = 'Barbados'
+        self.line = ['Barbados', 'Antigua']
         self.product = ('2KVE', '3KVE', '4K')
         self.image = None
         self.current_month = datetime.datetime.now().strftime('%Y-%m-%d')
