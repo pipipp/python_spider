@@ -4,4 +4,4 @@
 
 *--Running*
 
-![Running](https://github.com/pipipp/Spiders/blob/master/spiders/FOC/ccc_test_record_spider/images/ccc_requests.JPG)
+![Running](https://github.com/pipipp/Spiders/blob/master/spiders/FOC/ccc_test_record_spider/images/ccc_spider.JPG)
