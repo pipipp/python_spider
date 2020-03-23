@@ -419,6 +419,9 @@ class SpiderGui(object):
         return result
 
     def start_crawl(self):
+        threading.Thread(target=self._start_crawl, args=()).start()
+
+    def _start_crawl(self):
         all_input_info = self.get_all_input_info()
         if not all_input_info['username']:
             messagebox.showwarning('Warning', 'CEC username is null. Please enter again!')
