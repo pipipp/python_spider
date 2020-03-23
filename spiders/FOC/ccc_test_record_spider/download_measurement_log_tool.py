@@ -210,10 +210,9 @@ class CCCSpider(object):
             with open(file_name, 'wb') as wf:
                 wf.write(content)  # Write measurement log
 
-    def get_measurement_log_file(self, index, measurement_data, specified_file_type=[]):
+    def get_measurement_log_file(self, measurement_data, specified_file_type=[]):
         """
         Get measurement log file
-        :param int index: measurement data index
         :param dict measurement_data: measurement data
         :param list specified_file_type: The specified file type to download
         :return:
@@ -232,11 +231,13 @@ class CCCSpider(object):
                 if measures:
                     test_time = measurement_data['rectime'].replace(' ', '_').replace(':', '-')
                     test_status = measurement_data['attributes'].get('TEST') or 'PASS'
+                    if ':' in test_status:
+                        test_status = test_status.split(':')[0]
                     # Log name = 'ApolloServer - SN - TestTime - TestStatus - MeasuresType.log'
                     log_name = '{}_{}_{}_{}_{}.log'.format(measurement_data['machine'], serial_number,
                                                            test_time, test_status, measures[0])
                     self.download_measurement_log(file_name=log_name, binary_id=measures[1])
-                    print('Index: {} --> Writing to file << {} >> succeeded'.format(index + 1, log_name))
+                    print('Writing to file << {} >> succeeded'.format(log_name))
 
     def main(self, automatic_login=True, first_request_data={}, download_file_type=[], authentication_code=''):
         """
@@ -257,8 +258,8 @@ class CCCSpider(object):
         threads = []
         self.thread_pool = threading.Semaphore(value=self.thread_pool_max)  # Set thread pool
         print('Start multi-threading to download the measurement file')
-        for index, each_data in enumerate(all_data['results']):
-            t = threading.Thread(target=self.get_measurement_log_file, args=(index, each_data, download_file_type))
+        for each_data in all_data['results']:
+            t = threading.Thread(target=self.get_measurement_log_file, args=(each_data, download_file_type))
             threads.append(t)
 
         for thread in threads:
@@ -279,7 +280,7 @@ class SpiderGui(object):
 
         self.root = tk.Tk()
         self.root.geometry('590x335')
-        self.root.title('CCC Crawler Tool                         Author: ～Evan～')
+        self.root.title('Download CCC Measurement Log Tool')
 
         self.build_file_storage()
         self.load_image()
@@ -324,13 +325,13 @@ class SpiderGui(object):
         self.label1 = tk.Label(self.root, text='Start Time').grid(row=4, column=0)
         self.start_time = tk.StringVar()
         self.entry1 = tk.Entry(self.root, textvariable=self.start_time)
-        self.start_time.set(datetime.datetime.now().strftime('%Y-%m-%d') + ' 08:00:00')
+        self.start_time.set(datetime.datetime.now().strftime('%Y-%m-%d') + ' 00:00:00')
         self.entry1.grid(row=5, column=0, sticky=tk.W)
 
         self.label2 = tk.Label(self.root, text='End Time').grid(row=4, column=1)
         self.end_time = tk.StringVar()
         self.entry2 = tk.Entry(self.root, textvariable=self.end_time)
-        self.end_time.set(datetime.datetime.now().strftime('%Y-%m-%d') + ' 20:00:00')
+        self.end_time.set(datetime.datetime.now().strftime('%Y-%m-%d') + ' 00:00:00')
         self.entry2.grid(row=5, column=1, sticky=tk.W)
 
         tk.Label(self.root, text='UUT Type').grid(row=6, column=0)
