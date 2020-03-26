@@ -51,7 +51,7 @@ class Crawler(object):
                                                                                             collection_name))
 
     @staticmethod
-    def write_excel_table(write_info, table_name='excel_example.xls', sheet_name='first_page'):
+    def write_to_excel_table(write_info, table_name='excel_example.xls', sheet_name='first_page'):
         """
         写入Excel表格
         :param write_info: 要写入Excel表格的数据
@@ -74,14 +74,11 @@ class Crawler(object):
 
     def main(self):
         resp = requests.get(self.source_url, headers={'User-Agent': self.random_user_agent()})
+        print('status code: {}'.format(resp.status_code))
+        print('url: {}'.format(resp.url))
+        print('history: {}'.format(resp.history))
         if resp.status_code == 200:
             print(resp.text)
-
-            # selector = Selector(resp)
-        else:
-            print('No data found!')
-            print('url: {}'.format(resp.url))
-            print('history: {}'.format(resp.history))
 
 
 if __name__ == '__main__':
