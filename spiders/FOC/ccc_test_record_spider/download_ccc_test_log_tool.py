@@ -28,8 +28,9 @@ timedelta = calendar.datetime.timedelta
 
 class CCCSpider(object):
 
-    def __init__(self, login_account, thread_pool_max=5):
+    def __init__(self, login_account, thread_pool_max=10):
         self.login_account = login_account
+        self.download_results = None
         self.thread_pool = None
         self.thread_pool_max = thread_pool_max
         self.root_url = 'https://cesium.cisco.com/apps/cesiumhome/overview'
@@ -213,11 +214,14 @@ class CCCSpider(object):
             'binary_id': binary_id,
             'source': 'Apollo'
         }
+        flag = False
         resp = self.session.post(download_url, data=json.dumps(data))
         if resp.status_code == 200:
             content = base64.b64decode(resp.text)  # Base64 decode
             with open(file_name, 'wb') as wf:
                 wf.write(content)  # Write measurement log
+            flag = True
+        return flag
 
     def get_measurement_log_file(self, measurement_data, specified_file_type=[]):
         """
@@ -245,8 +249,22 @@ class CCCSpider(object):
                     # Log name = 'ApolloServer - SN - TestTime - TestStatus - MeasuresType.log'
                     log_name = '{}_{}_{}_{}_{}.log'.format(measurement_data['machine'], serial_number,
                                                            test_time, test_status, measures[0])
-                    self.download_measurement_log(file_name=log_name, binary_id=measures[1])
-                    print('Download the file << {} >> succeeded'.format(log_name))
+                    # Skip duplicate test logs
+                    if log_name in self.download_results:
+                        continue
+                    # Download the test log file
+                    flag = self.download_measurement_log(file_name=log_name, binary_id=measures[1])
+                    if flag:
+                        self.download_results.append(log_name)
+                        print('Download the file << {} >> succeeded'.format(log_name))
+                    else:
+                        # If download the test log fail, try again
+                        flag = self.download_measurement_log(file_name=log_name, binary_id=measures[1])
+                        if flag:
+                            self.download_results.append(log_name)
+                            print('Download the file << {} >> succeeded'.format(log_name))
+                        else:
+                            print('Download the file << {} >> fail !!!')
 
     def start_crawl(self, first_request_data={}, download_file_type=[]):
         """
@@ -260,6 +278,7 @@ class CCCSpider(object):
             raise ValueError('No data was found, Please check that the information you entered is correct!')
         print('Crawling all test data is completed, Total: {}'.format(len(all_data['results'])))
 
+        self.download_results = []
         threads = []
         self.thread_pool = threading.Semaphore(value=self.thread_pool_max)  # Set thread pool
         print('Start multi-threading to download the measurement file')
@@ -273,6 +292,7 @@ class CCCSpider(object):
         for thread in threads:
             thread.join()
         print('All the measurement files have been downloaded')
+        return self.download_results
 
 
 class Calendar(object):
@@ -673,8 +693,8 @@ class SpiderGui(object):
         self.pass_code = tk.StringVar()
         tk.Entry(self.window, textvariable=self.pass_code).grid(row=3, column=0, sticky=tk.NSEW)
 
-        tk.Button(self.window, text='Login', command=self.start_login, bg='MediumSpringGreen')\
-            .grid(row=3, column=1)
+        self.login_confirm = tk.Button(self.window, text='Login', command=self.start_login, bg='MediumSpringGreen')
+        self.login_confirm.grid(row=3, column=1)
         self.set_gui_center(window=self.window, x=1.4, y=3)
 
     @staticmethod
@@ -772,7 +792,7 @@ class SpiderGui(object):
         self.running_label_1.config(text='In Progress: ')
         self.running_label_2.destroy()
         self.bar = ttk.Progressbar(self.button_frame, mode="indeterminate", orient=tk.HORIZONTAL)
-        self.bar.start(10)
+        self.bar.start(8)
         self.bar.grid(row=1, column=1, sticky=tk.W, pady=5)
 
     def show_idle_status(self):
@@ -797,8 +817,13 @@ class SpiderGui(object):
         global spider
         spider = CCCSpider(login_account=(self.username.get(), self.password.get()), thread_pool_max=10)
         try:
+            self.show_running_bar()
+            self.login_confirm.config(text='Logining', state='disable')
+            self.login_button.config(text='Logining', state='disable')
             spider.login_ccc(authentication_code=self.pass_code.get())
         except Exception as es:
+            self.login_confirm.config(text='Login', state='active')
+            self.login_button.config(text='Login', state='active')
             messagebox.showerror('Error', 'Login failed\nError msg: {}'.format(es))
             return
         else:
@@ -806,6 +831,14 @@ class SpiderGui(object):
             self.login_button.config(text='Logined', state='disable')
             self.login_laber.config(text=self.username.get())
             self.logined_flag = True
+        finally:
+            self.show_idle_status()
+
+    def show_download_results(self, results):
+        self.board.delete(1.0, tk.END)
+        self.board.insert(tk.END, 'The total number of downloaded test logs is {}\n\n'.format(len(results)))
+        for index, each_result in enumerate(results):
+            self.board.insert(tk.END, '{}. << {} >>\n\n'.format(index + 1, each_result))
 
     def start_crawl(self):
         threading.Thread(target=self._start_crawl, args=()).start()
@@ -844,10 +877,12 @@ class SpiderGui(object):
         print('request_data:\n{}'.format(request_data))
         print('-' * 40)
         try:
+            self.board.delete(1.0, tk.END)
+            self.board.insert(tk.END, 'Please Wait...')
             self.show_running_bar()
             self.execute_button.config(text='Executing', state='disable')
-            spider.start_crawl(first_request_data=request_data,
-                               download_file_type=all_input_info['select_download_log'])
+            download_results = spider.start_crawl(first_request_data=request_data,
+                                                  download_file_type=all_input_info['select_download_log'])
         except Exception as es:
             messagebox.showerror('Error', 'Crawl failure\nError msg: {}'.format(es))
             return
@@ -856,6 +891,7 @@ class SpiderGui(object):
         finally:
             self.show_idle_status()
             self.execute_button.config(text='Execute', state='active')
+        self.show_download_results(results=download_results)
 
 
 if __name__ == '__main__':
