@@ -264,7 +264,7 @@ class CCCSpider(object):
                             self.download_results.append(log_name)
                             print('Download the file << {} >> succeeded'.format(log_name))
                         else:
-                            print('Download the file << {} >> fail !!!')
+                            print('Download the file << {} >> failed !!!')
 
     def start_crawl(self, first_request_data={}, download_file_type=[]):
         """

@@ -1,5 +1,6 @@
 """
 Cesium website crawler
+Download the test log file specified in the web site
 """
 # -*- coding:utf-8 -*-
 import os
@@ -16,8 +17,9 @@ __author__ = 'Evan'
 
 class CCCSpider(object):
 
-    def __init__(self, login_account, thread_pool_max=5):
+    def __init__(self, login_account, thread_pool_max=10):
         self.login_account = login_account
+        self.download_results = None
         self.thread_pool = None
         self.thread_pool_max = thread_pool_max
         self.root_url = 'https://cesium.cisco.com/apps/cesiumhome/overview'
@@ -29,10 +31,14 @@ class CCCSpider(object):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
                           ' Chrome/80.0.3987.132 Safari/537.36'
         })
-        # Create a folder to store all the measurement files
-        if not os.path.isdir('measurement_download_result'):
-            os.mkdir('measurement_download_result')
-        os.chdir('measurement_download_result')
+        self.build_storage_folder()
+
+    @staticmethod
+    def build_storage_folder():
+        # Create a folder to store all the download results
+        if not os.path.isdir('download_results'):
+            os.mkdir('download_results')
+        os.chdir('download_results')
 
     def login(self, authentication_code=''):
         """
@@ -205,11 +211,14 @@ class CCCSpider(object):
             'binary_id': binary_id,
             'source': 'Apollo'
         }
+        flag = False
         resp = self.session.post(download_url, data=json.dumps(data))
         if resp.status_code == 200:
             content = base64.b64decode(resp.text)  # Base64 decode
             with open(file_name, 'wb') as wf:
                 wf.write(content)  # Write measurement log
+            flag = True
+        return flag
 
     def get_measurement_log_file(self, measurement_data, specified_file_type=[]):
         """
@@ -237,8 +246,22 @@ class CCCSpider(object):
                     # Log name = 'ApolloServer - SN - TestTime - TestStatus - MeasuresType.log'
                     log_name = '{}_{}_{}_{}_{}.log'.format(measurement_data['machine'], serial_number,
                                                            test_time, test_status, measures[0])
-                    self.download_measurement_log(file_name=log_name, binary_id=measures[1])
-                    print('Writing to file << {} >> succeeded'.format(log_name))
+                    # Skip duplicate test logs
+                    if log_name in self.download_results:
+                        continue
+                    # Download the test log file
+                    flag = self.download_measurement_log(file_name=log_name, binary_id=measures[1])
+                    if flag:
+                        self.download_results.append(log_name)
+                        print('Download the file << {} >> succeeded'.format(log_name))
+                    else:
+                        # If download the test log fail, try again
+                        flag = self.download_measurement_log(file_name=log_name, binary_id=measures[1])
+                        if flag:
+                            self.download_results.append(log_name)
+                            print('Download the file << {} >> succeeded'.format(log_name))
+                        else:
+                            print('Download the file << {} >> failed !!!')
 
     def main(self, automatic_login=True, first_request_data={}, download_file_type=[], authentication_code=''):
         """
@@ -253,9 +276,10 @@ class CCCSpider(object):
         self.login_ccc(automatic_login, authentication_code)
         all_data = self.get_all_test_data(data=first_request_data)
         if not all_data or not all_data['results']:
-            raise ValueError('No data was found, Please confirm the requested data')
+            raise ValueError('No data was found, Please check that the information you entered is correct!')
         print('Crawling all test data is completed, Total: {}'.format(len(all_data['results'])))
 
+        self.download_results = []
         threads = []
         self.thread_pool = threading.Semaphore(value=self.thread_pool_max)  # Set thread pool
         print('Start multi-threading to download the measurement file')
