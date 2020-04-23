@@ -1,6 +1,5 @@
 """
-Cesium website crawler
-Download the test log file specified in the web site
+This is a quick tool to download the CCC website test log
 """
 # -*- coding:utf-8 -*-
 import os
@@ -20,7 +19,7 @@ from urllib.parse import unquote
 
 __author__ = 'Evan'
 
-# global variable
+# global
 spider = None
 datetime = calendar.datetime.datetime
 timedelta = calendar.datetime.timedelta
@@ -30,9 +29,8 @@ class CCCSpider(object):
 
     def __init__(self, login_account, thread_pool_max=10):
         self.login_account = login_account
-        self.download_results = None
-        self.thread_pool = None
-        self.thread_pool_max = thread_pool_max
+        self.download_results = []
+        self.thread_pool = threading.Semaphore(value=thread_pool_max)
         self.root_url = 'https://cesium.cisco.com/apps/cesiumhome/overview'
         self.verification_source_url = 'https://api-dbbfec7f.duosecurity.com'
         self.verification_prompt_url = self.verification_source_url + '/frame/prompt'
@@ -45,12 +43,12 @@ class CCCSpider(object):
 
     def login(self, authentication_code=''):
         """
-        Login CCC website
+        Login to the CCC website
         :param authentication_code: Fill in the Mobile pass code
         :return:
         """
         resp = self.session.get(self.root_url)
-        if '302' in str(resp.history):  # Redirect to the account login screen
+        if '302' in str(resp.history):  # Redirect to the account login interface
             login_url = re.search('name="login-form" action="(.+?)"', resp.text)
             data = {
                 'pf.username': self.login_account[0],
@@ -93,7 +91,7 @@ class CCCSpider(object):
                     # data = {
                     #     'sid': sid.group(1),
                     #     'device': 'phone1',
-                    #     'factor': 'Duo Push',  # Use mobile push login
+                    #     'factor': 'Duo Push',  # Use mobile phone to push login
                     #     'dampen_choice': 'true',
                     #     'out_of_date': 'False',
                     #     'days_out_of_date': '0',
@@ -129,29 +127,29 @@ class CCCSpider(object):
                                 token_url = 'https://cesium.cisco.com/apps/machineservices/MachineDetails.svc/getToken'
                                 resp = self.session.get(token_url)
                                 token = resp.json()['session']
-                                # Add Token in session
+                                # Adds a token to the crawler
                                 self.session.headers.update({
                                     'csession': token,
                                     '_csession': token
                                 })
 
-    def set_ccc_cookie(self, cookie, session):
+    def set_ccc_login_cookies(self, login_cookie, login_session):
         """
-        Add cookie and token to spider
-        :param cookie: Request cookie
-        :param session: Request token
+        Manually add cookie and session to the crawler
+        :param login_cookie: Manually enter the CCC website and copy the cookie to here
+        :param login_session: Manually enter the CCC website and copy the session to here
         :return:
         """
         self.session.headers.update({
-            'cookie': cookie,
-            'csession': session,
-            '_csession': session
+            'cookie': login_cookie,
+            'csession': login_session,
+            '_csession': login_session
         })
 
     def login_ccc(self, automatic_login=True, authentication_code=''):
         """
-        Login http://cesium.cisco.com
-        :param bool automatic_login: If the value is False, you need to manually add cookie and cession
+        Login to the CCC website
+        :param bool automatic_login: If the value is False, you need to manually add cookie and cession to crawler
         :param str authentication_code: Fill in the Mobile pass code
         :return:
         """
@@ -161,18 +159,21 @@ class CCCSpider(object):
             except Exception:
                 raise ValueError('The mobile pass code expires, Please fill in again!')
         else:
-            print('You need to login the CCC website and manually copy the cookie'
-                  ' and csession values to start the crawler')
-            cookie = input('Cookie: ')
-            session = input('Session: ')
-            if not cookie or not session:
-                raise ValueError('Cookie and cession are filled in incorrectly, please fill in again')
-            self.set_ccc_cookie(cookie=cookie, session=session)
+            print('You need to login the CCC website and press F12 to open the "developer tools" '
+                  'and manually copy the cookie and csession values to start the crawler')
+            while True:
+                cookie = input('cookie: ')
+                session = input('csession: ')
+                if not cookie or not session:
+                    print('Cookie and csession are empty, please fill in again')
+                    continue
+                break
+            self.set_ccc_login_cookies(login_cookie=cookie, login_session=session)
         print('Login CCC website successfully')
 
     def get_all_test_data(self, data={}):
         """
-        Get historical test data on the CCC website
+        Gets all crawl results after the request
         :param data: Fill in the request data for spider
         :return:
         """
@@ -183,11 +184,11 @@ class CCCSpider(object):
         else:
             return None
 
-    def get_measurement_data(self, serial_number='', specified_file_type=['sequence_log'], request_params={}):
+    def get_measurement_data(self, serial_number='', download_file_list=['sequence_log'], request_params={}):
         """
         Gets the specified measurement file for the specified serial number
         :param str serial_number: Test serial number
-        :param list specified_file_type: Fill in the type of measurement document,example:['sequence_log','UUT_buffer']
+        :param list download_file_list: Fill in the specified file type to download
         :param dict request_params: Fill in the request params for spider
         :return: (measurement type, measurement id)
         """
@@ -196,7 +197,7 @@ class CCCSpider(object):
         if resp.status_code == 200:
             measures_data = resp.json()
             for each_data in measures_data['measurements']:  # Walk through each measurement file
-                for file_type in specified_file_type:
+                for file_type in download_file_list:
                     if file_type in each_data['limit_id']:  # Matches the specified file type
                         yield (file_type, each_data['measurement'])  # return the measurement type and id for download
             else:
@@ -223,11 +224,11 @@ class CCCSpider(object):
             flag = True
         return flag
 
-    def get_measurement_log_file(self, measurement_data, specified_file_type=[]):
+    def get_measurement_log_file(self, measurement_data, download_file_list=[]):
         """
         Get measurement log file
-        :param dict measurement_data: measurement data
-        :param list specified_file_type: The specified file type to download
+        :param dict measurement_data: Measurement data
+        :param list download_file_list: Fill in the specified file type to download
         :return:
         """
         with self.thread_pool:  # Controls the number of thread pools
@@ -239,7 +240,7 @@ class CCCSpider(object):
                 'uuttype': measurement_data['uuttype']
             }
             for measures in self.get_measurement_data(serial_number=serial_number,
-                                                      specified_file_type=specified_file_type,
+                                                      download_file_list=download_file_list,
                                                       request_params=params):
                 if measures:
                     test_time = measurement_data['rectime'].replace(' ', '_').replace(':', '-')
@@ -259,6 +260,7 @@ class CCCSpider(object):
                         print('Download the file << {} >> succeeded'.format(log_name))
                     else:
                         # If download the test log fail, try again
+                        time.sleep(1)
                         flag = self.download_measurement_log(file_name=log_name, binary_id=measures[1])
                         if flag:
                             self.download_results.append(log_name)
@@ -266,11 +268,11 @@ class CCCSpider(object):
                         else:
                             print('Download the file << {} >> failed !!!')
 
-    def start_crawl(self, first_request_data={}, download_file_type=[]):
+    def start_crawl(self, first_request_data={}, download_file_list=[]):
         """
-        Login CCC website to crawl test data
+        Start the CCC crawler
         :param dict first_request_data: Fill in the first request data for spider
-        :param list download_file_type: Fill in the specified file type to download
+        :param list download_file_list: Fill in the specified file type to download
         :return:
         """
         all_data = self.get_all_test_data(data=first_request_data)
@@ -280,10 +282,9 @@ class CCCSpider(object):
 
         self.download_results = []
         threads = []
-        self.thread_pool = threading.Semaphore(value=self.thread_pool_max)  # Set thread pool
         print('Start multi-threading to download the measurement file')
         for each_data in all_data['results']:
-            t = threading.Thread(target=self.get_measurement_log_file, args=(each_data, download_file_type))
+            t = threading.Thread(target=self.get_measurement_log_file, args=(each_data, download_file_list))
             threads.append(t)
 
         for thread in threads:
@@ -292,7 +293,6 @@ class CCCSpider(object):
         for thread in threads:
             thread.join()
         print('All the measurement files have been downloaded')
-        return self.download_results
 
 
 class Calendar(object):
@@ -537,7 +537,7 @@ class SpiderGui(object):
         self.build_storage_folder()
         self.root = tk.Tk()
         self.root.geometry('640x410')
-        self.root.title('Download CCC Test Log Tool')
+        self.root.title('Download CCC Test Log Tool                      Author:  ★～Evan～★')
 
         self.build_date_frame()
         self.build_request_data_frame()
@@ -712,7 +712,7 @@ class SpiderGui(object):
         window.geometry('+%d+%d' % (x_info, y_info))
 
     def input_info_check(self):
-        # Check uut_type & serial_number & area & machine
+        # Format input parameter (uut_type & serial_number & area & machine)
         uut_type = self.uut_type.get(1.0, tk.END).strip()
         serial_number = self.serial_number.get(1.0, tk.END).strip()
         area = self.area.get(1.0, tk.END).strip()
@@ -732,14 +732,14 @@ class SpiderGui(object):
                 _uut_type = ''
             input_result.append(_uut_type)
 
-        # Check select_status
+        # Format input parameter (test status)
         select_status = []
         for status in [self.fail_status.get(), self.pass_status.get(), self.about_status.get()]:
             if status:
                 select_status.append(status)
         select_status = ','.join(select_status)
 
-        # Check select_download_log
+        # Format input parameter (download log type)
         select_download_log = []
         for status in [self.seq_log.get(), self.uut_buffer.get()]:
             if status:
@@ -762,6 +762,8 @@ class SpiderGui(object):
             'select_download_log': select_download_log,
             'use_debug': use_debug,
         }
+
+        # Check start time and end time
         if final_result['start_time'] and final_result['end_time']:
             time_format = re.compile(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$')
             for i in [final_result['start_time'], final_result['end_time']]:
@@ -773,14 +775,17 @@ class SpiderGui(object):
             messagebox.showwarning('Warning', 'Start time or end time is null. Please enter again!')
             return None
 
+        # Check download log type
         if not final_result['select_download_log']:
             messagebox.showwarning('Warning', 'Select download log is null. Please enter again!')
             return None
 
+        # Check test status
         if not final_result['select_status']:
             messagebox.showwarning('Warning', 'Select status is null. Please enter again!')
             return None
 
+        # Check uut_type & serial_number & area & machine
         if not final_result['uut_type'] and not final_result['serial_number'] and \
                 not final_result['area'] and not final_result['machine']:
             messagebox.showwarning('Warning', 'Search information cannot be empty. Please enter again!')
@@ -881,8 +886,8 @@ class SpiderGui(object):
             self.board.insert(tk.END, 'Please Wait...')
             self.show_running_bar()
             self.execute_button.config(text='Executing', state='disable')
-            download_results = spider.start_crawl(first_request_data=request_data,
-                                                  download_file_type=all_input_info['select_download_log'])
+            spider.start_crawl(first_request_data=request_data,
+                               download_file_list=all_input_info['select_download_log'])
         except Exception as es:
             messagebox.showerror('Error', 'Crawl failure\nError msg: {}'.format(es))
             return
@@ -891,7 +896,7 @@ class SpiderGui(object):
         finally:
             self.show_idle_status()
             self.execute_button.config(text='Execute', state='active')
-        self.show_download_results(results=download_results)
+        self.show_download_results(results=spider.download_results)
 
 
 if __name__ == '__main__':
