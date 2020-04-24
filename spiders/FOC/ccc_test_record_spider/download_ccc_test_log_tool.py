@@ -285,6 +285,7 @@ class CCCSpider(object):
         print('Start multi-threading to download the measurement file')
         for each_data in all_data['results']:
             t = threading.Thread(target=self.get_measurement_log_file, args=(each_data, download_file_list))
+            t.daemon = True
             threads.append(t)
 
         for thread in threads:
