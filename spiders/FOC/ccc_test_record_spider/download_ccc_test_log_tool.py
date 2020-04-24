@@ -393,12 +393,12 @@ class Calendar(object):
         s.CB_year.grid(in_=hframe, column=1, row=0)
         s.CB_year.bind('<KeyPress>', lambda event: s._update(event, True))
         s.CB_year.bind("<<ComboboxSelected>>", s._update)
-        tk.Label(hframe, text='年', justify='left').grid(in_=hframe, column=2, row=0, padx=(0, 5))
+        tk.Label(hframe, text='Year', justify='left').grid(in_=hframe, column=2, row=0, padx=(0, 5))
         s.CB_month = ttk.Combobox(hframe, width=3, values=['%02d' % month for month in range(1, 13)], state='readonly')
         s.CB_month.current(datetime.now().month - 1)
         s.CB_month.grid(in_=hframe, column=3, row=0)
         s.CB_month.bind("<<ComboboxSelected>>", s._update)
-        tk.Label(hframe, text='月', justify='left').grid(in_=hframe, column=4, row=0)
+        tk.Label(hframe, text='Month', justify='left').grid(in_=hframe, column=4, row=0)
         s._calendar = ttk.Treeview(gframe, show='', selectmode='none', height=7)
         s._calendar.pack(expand=1, fill='both', side='bottom', padx=5)
         ttk.Button(bframe, text="Confirm", width=7, command=lambda: s._exit(True))\
@@ -410,7 +410,7 @@ class Calendar(object):
         tk.Frame(s.G_Frame, bg='#565656').place(x=0, y=0, relx=198 / 200, rely=0, relwidth=2 / 200, relheigh=1)
 
     def __config_calendar(s):
-        cols = ['日', '一', '二', '三', '四', '五', '六']
+        cols = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         s._calendar['columns'] = cols
         s._calendar.tag_configure('header', background='grey90')
         s._calendar.insert('', 'end', values=cols, tag='header')
@@ -841,9 +841,12 @@ class SpiderGui(object):
 
     def show_download_results(self, results):
         self.board.delete(1.0, tk.END)
-        self.board.insert(tk.END, 'The total number of downloaded test logs is {}\n\n'.format(len(results)))
-        for index, each_result in enumerate(results):
-            self.board.insert(tk.END, '{}. << {} >>\n\n'.format(index + 1, each_result))
+        if results:
+            self.board.insert(tk.END, 'The total number of downloaded test logs is {}\n\n'.format(len(results)))
+            for index, each_result in enumerate(results):
+                self.board.insert(tk.END, '{}. << {} >>\n\n'.format(index + 1, each_result))
+        else:
+            self.board.insert(tk.END, 'The download result is empty!')
 
     def start_crawl(self):
         threading.Thread(target=self._start_crawl, args=()).start()
