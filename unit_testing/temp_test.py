@@ -8,7 +8,7 @@ plt.rcParams['axes.unicode_minus'] = False
 plt.figure(figsize=(10, 5), dpi=300)
 ax = plt.subplot(111)
 
-plt.xlabel('全球排名前三国家曲线图', size=12)  # 添加X轴标签
+plt.xlabel('排名前三国家趋势图', size=12)  # 添加X轴标签
 plt.ylabel('数值')  # 添加Y轴标签
 plt.ylim([1, 50])  # 设置Y轴的刻度范围
 
@@ -35,4 +35,4 @@ plt.plot(case_3_x, case_3_y, linewidth=2, label='case_3', color='g')
 # 显示曲线标注
 plt.legend(loc="lower right")
 plt.grid(linewidth=1.0, linestyle='--')
-plt.savefig('排名曲线图.jpg', bbox_inches='tight')  # 保存图片
+plt.savefig('排名前三国家趋势图.jpg', bbox_inches='tight')  # 保存图片
