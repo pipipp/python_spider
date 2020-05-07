@@ -91,22 +91,26 @@ class Spider(object):
         # 处理中文乱码
         plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
         plt.rcParams['axes.unicode_minus'] = False
-        # plt.figure(figsize=(10, 5), dpi=300)
-        # plt.subplot(111)
+        plt.figure(figsize=(10, 5), dpi=300)  # 提高画质
+        plt.subplot(111)
 
-        plt.xlabel('排名前三国家趋势图（4月份）', size=10)  # 添加X轴标签
+        plt.xlabel('2020年4月份疫情确诊数量趋势图 <<全球排名前五国家>>（除中国）', size=10)  # 添加X轴标签
         x_label = ['{}'.format(i) for i in range(1, 31)]  # 设置X轴的刻度值
-        plt.ylabel('确诊数量', size=10)  # 添加Y轴标签
+        plt.ylabel('确诊数量（人）', size=10)  # 添加Y轴标签
         plt.ylim([80000, 1250000])  # 设置Y轴的刻度范围
 
-        # 获取排名前三国家的信息
+        # 获取排名前五国家的信息
         number_one = data[0]
         number_one_name = data[0]['国家']
         number_two = data[1]
         number_two_name = data[1]['国家']
         number_three = data[2]
         number_three_name = data[2]['国家']
-        for i in [number_one, number_two, number_three]:  # 删除不要的字典
+        number_four = data[3]
+        number_four_name = data[3]['国家']
+        number_five = data[4]
+        number_five_name = data[4]['国家']
+        for i in [number_one, number_two, number_three, number_four, number_five]:  # 删除不要的字典
             del i['国家']
             del i['汇总']
 
@@ -114,6 +118,8 @@ class Spider(object):
         number_one_count = []
         number_two_count = []
         number_three_count = []
+        number_four_count = []
+        number_five_count = []
         for column in x_label:
             value = int(number_one['2020/4/' + column])
             number_one_count.append(value)
@@ -126,16 +132,26 @@ class Spider(object):
             value = int(number_three['2020/4/' + column])
             number_three_count.append(value)
             plt.scatter('{:02d}'.format(int(column)), int(number_three['2020/4/' + column]), marker='D', s=20, color="g")
+        for column in x_label:
+            value = int(number_four['2020/4/' + column])
+            number_four_count.append(value)
+            plt.scatter('{:02d}'.format(int(column)), int(number_four['2020/4/' + column]), marker='D', s=20, color="#00CED1")
+        for column in x_label:
+            value = int(number_five['2020/4/' + column])
+            number_five_count.append(value)
+            plt.scatter('{:02d}'.format(int(column)), int(number_five['2020/4/' + column]), marker='D', s=20, color="#DC143C")
 
         x_label_count = ['{:02d}'.format(int(i)) for i in x_label]
         plt.plot(x_label_count, number_one_count, linewidth=2, label=number_one_name, color="#1E90FF")
         plt.plot(x_label_count, number_two_count, linewidth=2, label=number_two_name, color='#FFA500')
         plt.plot(x_label_count, number_three_count, linewidth=2, label=number_three_name, color='g')
+        plt.plot(x_label_count, number_four_count, linewidth=2, label=number_four_name, color='#00CED1')
+        plt.plot(x_label_count, number_five_count, linewidth=2, label=number_five_name, color='#DC143C')
 
         # 显示曲线标注
         plt.legend(loc="right")
         plt.grid(linewidth=1.0, linestyle='--')
-        plt.savefig('排名前三国家趋势图.jpg', bbox_inches='tight')  # 保存图片
+        plt.savefig('排名前五国家趋势图.jpg', bbox_inches='tight')  # 保存图片
 
     def main(self):
         # 获取所有国家的URL
