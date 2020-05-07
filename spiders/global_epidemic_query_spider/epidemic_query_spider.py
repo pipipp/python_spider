@@ -175,7 +175,7 @@ class Spider(object):
                         break
             # 写入到csv表格
             self.write_csv_data(write_info=result, file_name='全球疫情确诊数量汇总')
-            # 画出数量排名前三的趋势图
+            # 画出数量排名前五的趋势图
             self.draw_tendency_chart(result)
         else:
             print('没有爬取到任何的国家信息！')
