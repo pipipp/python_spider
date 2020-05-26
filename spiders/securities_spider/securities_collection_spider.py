@@ -1,5 +1,6 @@
 """
 爬取同花顺财经网站的证券数据
+抓取龙虎榜历史数据和详细数据写入到JSON文本
 """
 # -*- coding:utf-8 -*-
 import requests
@@ -15,9 +16,9 @@ class Crawler(object):
     def __init__(self, keyword=''):
         self.resource_url = 'http://data.10jqka.com.cn/ifmarket/lhbhistory/orgcode/{}/field/ENDDATE/order/desc/page/{}/'
         self.stock_link_url = 'http://data.10jqka.com.cn/ifmarket/getnewlh/code'
-        self.keyword = keyword
-        self.stock_history_data = {}
-        self.stock_detail_data = {}
+        self.keyword = keyword  # 股票查询关键字
+        self.stock_history_data = {}  # 保存所有的历史数据
+        self.stock_detail_data = {}  # 保存所有的详细数据
         self.headers = {
             'Host': 'data.10jqka.com.cn',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -27,7 +28,7 @@ class Crawler(object):
     @staticmethod
     def write_json_data(write_info, file_name='json_file'):
         """
-        写入JSON数据
+        写入JSON文本
         :param write_info: 要写入的字典
         :param file_name: 文件名称
         :return:
@@ -75,6 +76,7 @@ class Crawler(object):
 
                 # 获取第一页后续的页面数据
                 max_page = stock_info[0]['页数'].split('/')[-1]
+                print('一共有{}页'.format(max_page))
                 for page in range(2, int(max_page) + 1):
                     print('正在获取第{}页历史数据...'.format(page))
                     resp = requests.get(self.resource_url.format(self.keyword, page), headers=self.headers)
@@ -153,12 +155,14 @@ class Crawler(object):
             os.mkdir('stock_result')
         self.write_json_data(write_info=self.stock_history_data, file_name='./stock_result/stock_history_data')
         self.write_json_data(write_info=self.stock_detail_data, file_name='./stock_result/stock_detail_data')
+        print('全部数据写入完毕，爬取结束！')
 
     def main(self):
+        # 获取营业部实例分析板块下的营业部上榜历史数据
         self.get_historical_data()
+        # 获取股票的龙虎榜详细数据
         self.get_stock_detail()
-        print('stock history data: {}'.format(self.stock_history_data))
-        print('stock detail data: {}'.format(self.stock_detail_data))
+        # 保存所有的爬取结果到JSON文本
         self.save_data()
 
 
