@@ -71,7 +71,8 @@ FEED_EXPORT_ENCODING = 'gb18030'  # 在csv格式下转换中文编码
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'lagou.pipelines.TextPipeline': 300,
-    'lagou.pipelines.MongoPipeline': 302,
+    'lagou.pipelines.MongoPipeline': 301,
+    'lagou.pipelines.CsvPipeline': 302,
 }
 
 # Mongodb配置

@@ -5,8 +5,30 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 import pymongo
-import re
-import os
+import json
+
+from scrapy.exporters import CsvItemExporter
+from collections import OrderedDict
+
+
+class CsvPipeline(object):
+    """
+    写入有序的数据到CSV表格
+    """
+    def __init__(self):
+        self.file = open('./result/crawl_result.csv', 'wb')
+        self.exporter = CsvItemExporter(self.file, encoding='gbk')
+        self.exporter.start_exporting()
+
+    def close_spider(self, spider):
+        self.exporter.finish_exporting()
+        self.file.close()
+
+    def process_item(self, item, spider):
+        item = OrderedDict(item)  # 转换为有序的字典
+        item = json.dumps(item, ensure_ascii=False)  # 转换为JSON格式
+        self.exporter.export_item(eval(item))  # 输出到CSV表格
+        return item
 
 
 class TextPipeline(object):
