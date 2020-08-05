@@ -1,5 +1,6 @@
 """
-This is a quick tool to download the CCC website test log
+This is a quick download tool for CCC website test logs（https://cesium.cisco.com/）
+After running, a GUI window opens and you can select the test log within the specified date for batch download
 """
 # -*- coding:utf-8 -*-
 import os
