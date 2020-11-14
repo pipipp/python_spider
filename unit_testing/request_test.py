@@ -6,6 +6,7 @@ import xlwt
 
 from pymongo import MongoClient
 from scrapy.selector import Selector
+from urllib.parse import quote, unquote
 
 __author__ = 'Evan'
 
