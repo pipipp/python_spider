@@ -3,10 +3,14 @@ This is a quick download tool for CCC website test logs（https://cesium.cisco.c
 After running, a GUI window opens and you can select the test log within the specified date for batch download
 """
 # -*- coding:utf-8 -*-
+# @Time     : 2020/03/21
+# @Author   : Evan Liu
+
 import os
 import re
 import json
 import time
+import html
 import base64
 import requests
 import threading
@@ -16,9 +20,6 @@ import tkinter.font as tkFont
 
 from tkinter import ttk
 from tkinter import messagebox
-from urllib.parse import unquote
-
-__author__ = 'Evan'
 
 # global
 spider = None
@@ -74,65 +75,77 @@ class CCCSpider(object):
                     'screen_resolution_height': '1080',
                     'color_depth': '24',
                     'is_cef_browser': 'false',
-                    'is_ipad_os': 'false'
+                    'is_ipad_os': 'false',
+                    'react_support': 'True'
                 }
                 # Request for certification --> https://api-dbbfec7f.duosecurity.com/frame/web/v1/auth?
                 resp = self.session.post(authentication_url, data=data)
-                if '302' in str(resp.history):  # Redirect into the mobile phone verification interface
-                    sid = re.search('sid=(.+)', unquote(resp.url))
-                    data = {
-                        'sid': sid.group(1),
-                        'device': 'phone1',
-                        'factor': 'Passcode',  # Use mobile pass code login
-                        'passcode': authentication_code,
-                        'out_of_date': 'False',
-                        'days_out_of_date': '0',
-                        'days_to_block': 'None'
-                    }
-                    # data = {
-                    #     'sid': sid.group(1),
-                    #     'device': 'phone1',
-                    #     'factor': 'Duo Push',  # Use mobile phone to push login
-                    #     'dampen_choice': 'true',
-                    #     'out_of_date': 'False',
-                    #     'days_out_of_date': '0',
-                    #     'days_to_block': 'None'
-                    # }
-                    # Start validation
-                    resp = self.session.post(self.verification_prompt_url, data=data)
-                    if resp.status_code == 200:
-                        # input('Please use your mobile phone to verify the login request'
-                        #       ' [Press enter to continue after verification]: ')
+
+                # 2020/11/12 update，Due to authentication interface upgrade
+                if resp.status_code == 200:  # Gets multiple authentication parameters to start authentication
+                    capture_params = ['sid', 'akey', 'txid', 'response_timeout', 'parent',
+                                      'duo_app_url', 'eh_service_url', 'eh_download_link', 'is_silent_collection']
+                    verify_param_dict = {}
+                    for param in capture_params:
+                        regex = r'type="hidden" name="{}" value="?(.+?)"?\s?/?>'.format(param)
+                        matched = html.unescape(re.search(regex, resp.text).group(1))  # Unescape HTML
+                        verify_param_dict[param] = matched
+
+                    resp = self.session.post(authentication_url, data=verify_param_dict)
+                    if '302' in str(resp.history):  # Redirect into the mobile phone verification interface
                         data = {
-                            'sid': sid.group(1),
-                            'txid': resp.json()['response']['txid']
+                            'sid': verify_param_dict['sid'],
+                            'device': 'phone1',
+                            'factor': 'Passcode',  # Use mobile pass code login
+                            'passcode': authentication_code,
+                            'out_of_date': 'False',
+                            'days_out_of_date': '0',
+                            'days_to_block': 'None'
                         }
-                        # Get validation results
-                        resp = self.session.post(self.verification_status_url, data=data)
+                        # data = {
+                        #     'sid': verify_param_dict['sid'],
+                        #     'device': 'phone1',
+                        #     'factor': 'Duo Push',  # Use mobile phone to push login
+                        #     'dampen_choice': 'true',
+                        #     'out_of_date': 'False',
+                        #     'days_out_of_date': '0',
+                        #     'days_to_block': 'None'
+                        # }
+                        # Start validation
+                        resp = self.session.post(self.verification_prompt_url, data=data)
                         if resp.status_code == 200:
-                            status_result_url = self.verification_source_url + resp.json()['response']['result_url']
+                            # input('Please use your mobile phone to verify the login request'
+                            #       ' [Press enter to continue after verification]: ')
                             data = {
-                                'sid': sid.group(1)
+                                'sid': verify_param_dict['sid'],
+                                'txid': resp.json()['response']['txid']
                             }
-                            # Gets the cookie for the validation result
-                            resp = self.session.post(status_result_url, data=data)
+                            # Get validation results
+                            resp = self.session.post(self.verification_status_url, data=data)
                             if resp.status_code == 200:
-                                authentication_url = resp.json()['response']['parent']
-                                sig_response = resp.json()['response']['cookie']
+                                status_result_url = self.verification_source_url + resp.json()['response']['result_url']
                                 data = {
-                                    'sig_response': sig_response + sig_request.group(2)
+                                    'sid': verify_param_dict['sid'],
                                 }
-                                # Retrieve the cookie and re-enter the authentication interface
-                                self.session.post(authentication_url, data=data)
-                                # Carry the authenticated cookie acquisition Token
-                                token_url = 'https://cesium.cisco.com/apps/machineservices/MachineDetails.svc/getToken'
-                                resp = self.session.get(token_url)
-                                token = resp.json()['session']
-                                # Adds a token to the crawler
-                                self.session.headers.update({
-                                    'csession': token,
-                                    '_csession': token
-                                })
+                                # Gets the cookie for the validation result
+                                resp = self.session.post(status_result_url, data=data)
+                                if resp.status_code == 200:
+                                    authentication_url = resp.json()['response']['parent']
+                                    sig_response = resp.json()['response']['cookie']
+                                    data = {
+                                        'sig_response': sig_response + sig_request.group(2)
+                                    }
+                                    # Retrieve the cookie and re-enter the authentication interface
+                                    self.session.post(authentication_url, data=data)
+                                    # Carry the authenticated cookie acquisition Token
+                                    token_url = 'https://cesium.cisco.com/apps/machineservices/MachineDetails.svc/getToken'
+                                    resp = self.session.get(token_url)
+                                    token = resp.json()['session']
+                                    # Adds a token to the crawler
+                                    self.session.headers.update({
+                                        'csession': token,
+                                        '_csession': token
+                                    })
 
     def set_ccc_login_cookies(self, login_cookie, login_session):
         """
@@ -157,8 +170,9 @@ class CCCSpider(object):
         if automatic_login:
             try:
                 self.login(authentication_code=authentication_code)
-            except Exception:
-                raise ValueError('The mobile pass code expires, Please fill in again!')
+            except Exception as ex:
+                raise ValueError(f'Please check whether the login account and mobile pass code are correct'
+                                 f' or website may be upgraded\nRaise info: {ex}')
         else:
             print('You need to login the CCC website and press F12 to open the "developer tools" '
                   'and manually copy the cookie and csession values to start the crawler')
@@ -170,6 +184,10 @@ class CCCSpider(object):
                     continue
                 break
             self.set_ccc_login_cookies(login_cookie=cookie, login_session=session)
+
+        # Login token double check
+        if not self.session.headers.get('csession') or not self.session.headers.get('_csession'):
+            raise ValueError('The mobile pass code expires or website may be upgraded\nPlease fill in again!')
         print('Login CCC website successfully')
 
     def get_all_test_data(self, data={}):
@@ -539,7 +557,7 @@ class SpiderGui(object):
         self.build_storage_folder()
         self.root = tk.Tk()
         self.root.geometry('640x410')
-        self.root.title('Download CCC Test Log Tool                      Author:  ★～Evan～★')
+        self.root.title('Download CCC Test Log Tool                         @Author: Evan Liu | @Version: 2.0')
 
         self.build_date_frame()
         self.build_request_data_frame()
@@ -578,6 +596,10 @@ class SpiderGui(object):
         self.button_frame.grid(row=2, column=1, sticky=tk.NSEW, rowspan=2, columnspan=3)
 
     def tk_quit(self):
+        try:
+            os.system('taskkill /im download_ccc_test_log_tool.exe /f')  # Force kill process
+        except Exception:
+            pass
         self.root.destroy()
         self.root.quit()
 
@@ -822,7 +844,7 @@ class SpiderGui(object):
             messagebox.showwarning('Warning', 'Mobile pass code is null. Please enter again!')
             return
         global spider
-        spider = CCCSpider(login_account=(self.username.get(), self.password.get()), thread_pool_max=10)
+        spider = CCCSpider(login_account=(self.username.get(), self.password.get()))
         try:
             self.show_running_bar()
             self.login_confirm.config(text='Logining', state='disable')
@@ -831,7 +853,7 @@ class SpiderGui(object):
         except Exception as es:
             self.login_confirm.config(text='Login', state='active')
             self.login_button.config(text='Login', state='active')
-            messagebox.showerror('Error', 'Login failed\nError msg: {}'.format(es))
+            messagebox.showerror('Error', 'Login failure\nError msg: {}'.format(es))
             return
         else:
             self.window.destroy()
