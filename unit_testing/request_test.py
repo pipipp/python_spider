@@ -2,6 +2,7 @@
 import re
 import os
 import time
+import datetime
 import json
 import random
 import requests
@@ -9,6 +10,7 @@ import pandas as pd
 
 from pprint import pprint
 from urllib.parse import quote, unquote
+from collections import OrderedDict
 from pymongo import MongoClient
 
 __author__ = 'Evan'
@@ -19,8 +21,6 @@ class RequestTest(object):
     def __init__(self, source_url):
         self.source_url = source_url
         self.session = requests.Session()
-        self.database = None
-        self.collection = None
 
     @staticmethod
     def random_user_agent():
@@ -40,7 +40,8 @@ class RequestTest(object):
         ]
         return random.choice(ua_list)
 
-    def login_mongodb(self, database_name, collection_name):
+    @staticmethod
+    def login_mongodb(database_name, collection_name):
         """
         连接Mongodb客户端
         :param database_name: 数据库名称
@@ -48,10 +49,11 @@ class RequestTest(object):
         :return:
         """
         client = MongoClient(host='localhost', port=27017)
-        self.database = client[database_name]
-        self.collection = self.database[collection_name]
+        database = client[database_name]
+        collection = database[collection_name]
         print('Login mongodb successfully, database_name="{}", collection_name="{}"'.format(database_name,
                                                                                             collection_name))
+        return database, collection
 
     @staticmethod
     def write_to_table(raw_data, columns, file_name='result.xls', to_file='excel'):
