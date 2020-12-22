@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+全球疫情确诊数量爬虫
+"""
 import requests
 import threading
 import re
