@@ -8,5 +8,5 @@ proxy_spider_settings = dict(
 # 代理验证配置文件
 proxy_check_settings = dict(
     VALIDATE_URL='https://www.baidu.com/',  # 代理IP验证网址
-    THREAD_POOL_MAX=100,  # 线程池最大数量（1个线程验证一个代理IP信息）
+    THREAD_POOL_MAX=5,  # 线程池最大数量（1个线程验证一个代理IP信息）
 )
