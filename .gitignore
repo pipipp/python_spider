@@ -6,6 +6,5 @@
 # virtualenv
 /.api/*
 __pycache__/
-db.sqlite3
 *.xml
 *.swp
